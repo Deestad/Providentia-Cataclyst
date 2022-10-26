@@ -3,7 +3,10 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ext.commands import Bot
 import json
+import random, time
 vf = open('versioninfo.json')
+
+#VERSION INFO ORG
 versioninfo = json.load(vf)
 version = versioninfo["version"]
 versiontitle = versioninfo["versiontitle"]
@@ -28,7 +31,21 @@ class aclient(discord.Client):
         await self.wait_until_ready()
         if not self.synced:
             await tree.sync(guild = discord.Object(id =696830110493573190))
-
+    async def on_message(self, message):
+        blacklist = open('MilitaryData/enemyinfo.json')
+        blacklist = json.load(blacklist)
+        if message.author.id in blacklist["jambonians"]:
+            await message.reply("Jambônico detectado. Preparando ataque...")
+            time.sleep(3)
+            await message.reply("https://tenor.com/view/star-wars-death-star-plans-death-star-upload-gif-11761973")
+            try1 = random.randint(1, 2)
+            if try1 == 1:
+                embedVar = DefaultEmbed("Sistema iniciado com sucesso.", f"Carregando fluxo de neutrons da arma orbital direcionada aos usuários {blacklist['jambonians']} ")
+                await message.reply(embed=embedVar)
+            else:
+                embedVar = DefaultEmbed("Falha crítica!",
+                                        f"Ataque cancelado devido a erros no reator nuclear! Interferência detectada! Origem: {blacklist['jambonians']} ")
+                await message.reply(embed=embedVar)
 client = aclient()
 tree = app_commands.CommandTree(client)
 
