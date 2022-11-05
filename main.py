@@ -8,6 +8,7 @@ vf = open('versioninfo.json')
 
 #VERSION INFO ORG
 versioninfo = json.load(vf)
+token = versioninfo["token"]
 version = versioninfo["version"]
 versiontitle = versioninfo["versiontitle"]
 prefix = versioninfo["prefix"]
@@ -58,6 +59,6 @@ async def self(interaction: discord.Interaction):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print(f"A versão é {version}")
-    client.run('OTE1MjQ4NjkyOTYzOTg3NDc5.Ghcwlm.lRrZihmIKBzeocxGeWxPzxz3GKtbRV75B-nQOU')
+    client.run(token)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
