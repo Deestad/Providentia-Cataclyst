@@ -5,7 +5,7 @@ from discord.ext.commands import Bot
 import json
 import random, time
 vf = open('versioninfo.json')
-opentoken = open('token.json')
+opentoken = open("MilitaryData/token.json")
 
 #VERSION INFO ORG
 versioninfo = json.load(vf)
