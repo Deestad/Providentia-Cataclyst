@@ -5,10 +5,12 @@ from discord.ext.commands import Bot
 import json
 import random, time
 vf = open('versioninfo.json')
+opentoken = open('token.json')
 
 #VERSION INFO ORG
 versioninfo = json.load(vf)
-token = versioninfo["token"]
+tokenfile = json.load(opentoken)
+token = tokenfile["token"]
 version = versioninfo["version"]
 versiontitle = versioninfo["versiontitle"]
 prefix = versioninfo["prefix"]
