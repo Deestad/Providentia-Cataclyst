@@ -26,6 +26,9 @@ activity = discord.Streaming(name=f"Prefixo: {prefix} - Providentia v.{version},
                              url="https://www.youtube.com/watch?v=0W2kXsQ5ZYc")
 global genocidemode
 genocidemode = False
+global defensemode
+defensemode = False
+
 
 def DefaultEmbed(title,message):
     embedVar = discord.Embed(title=f"{title}", description=f"{message}", color=0xb603fc)
@@ -109,8 +112,24 @@ async def self(interaction: discord.Interaction, searchquery: str):
                 message = ("Desculpe, não pude encontrar o que você está procurando.")
                 embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
+@tree.command(name="mododedefesa",description="Ativação do modo de defesa contra invasão.",guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction):
+    if interaction.permissions.administrator:
+        global defensemode
+        if defensemode == False:
+            embedVar = DefaultEmbed("Ativando modo de defesa.","Protocolos de defesa ativados. Análise de ameaças em andamento. Identificação de mísseis detectada. Iniciando sistemas de interceptação. Contramedidas eletromagnéticas ativas. Desvio das trajetórias das ameaças. Monitoramento de tráfego de dados hostis. Ativando firewalls adaptáveis. Filtragem de padrões suspeitos. Salvaguardando a integridade das redes.")
+            await interaction.response.send_message(embed=embedVar)
+            await interaction.channel.edit(slowmode_delay=30)
+            defensemode = True
+        else:
+            embedVar = DefaultEmbed("Desativando modo de defesa.", "Desativação dos protocolos de defesa iniciada. Processo de encerramento em andamento. Revertendo sistemas de interceptação. Restaurando operações normais. Monitoramento de tráfego em declínio. Desligando firewalls adaptáveis. Retomando padrões regulares de tráfego. Confirmação da restauração da normalidade. Modo de defesa desativado com sucesso. Aguardando novas instruções.")
+            await interaction.response.send_message(embed=embedVar)
+            await interaction.channel.edit(slowmode_delay=0)
+            defensemode = False
+
 
 if __name__ == '__main__':
+    print("The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     print(f"A versão é {version}")
     client.run(token)
 
