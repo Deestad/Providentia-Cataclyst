@@ -1,7 +1,7 @@
   {
-    "version": "0.2",
-    "versiontitle": "Projeto Initialization",
-    "lasthighlight": "O bot foi enviado ao GIT e agora deve se manter em atualização constante. A base do sistema da Providentia foi construído com sucesso de forma eficiente e limpa. Os comandos de prefixo foram substituidos por comandos com barra, uma nova funcionalidade do Discord.",
+    "version": "0.5",
+    "versiontitle": "Projeto Integrationem",
+    "lasthighlight": "Principais Características da Atualização:\n\n    Modo de Ataque: A Providentia Tipo D agora está equipada com um Modo de Ataque avançado, permitindo que ela defenda com eficácia contra ameaças potenciais. Seu sistema de análise e estratégia integrado permite que ela tome decisões precisas para proteger áreas designadas.\n\n    Modo de Defesa: O novo Modo de Defesa permite que a Providentia Tipo D detecte e neutralize tentativas de invasão ou ameaças cibernéticas. Seu algoritmo de segurança aprimorado garante a proteção contínua de dados sensíveis.\n\n    Comunicação Restrita: A Providentia Tipo D agora tem a capacidade de comunicação, porém, essa funcionalidade é limitada somente ao desenvolvedor e ao imperador da nação. Isso garante que as interações sejam restritas a pessoas autorizadas, mantendo a confidencialidade e a segurança das informações.\n\nPerspectivas Futuras:\n\nNossa equipe de desenvolvimento está empenhada em aprimorar ainda mais a Providentia Tipo D para oferecer benefícios excepcionais à nação. Estamos trabalhando no desenvolvimento de recursos que permitirão que ela forneça informações de trabalho e atualizações de utilidade para otimizar operações e tomada de decisões.\n\nFuncionalidade Atual:\n\nNesta versão, a Providentia Tipo D está apta a fornecer informações meteorológicas como parte de sua funcionalidade inicial. Isso permite que você fique atualizado sobre as condições climáticas locais.",
     "prefix": "!p",
     "token": "OTE1MjQ4NjkyOTYzOTg3NDc5.GQu66K.nfCLuJDnxiWCuUmMmAd8CmY3y14EMqq7rV_IdE"
 

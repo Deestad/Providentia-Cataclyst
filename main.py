@@ -8,7 +8,7 @@ import random, time
 import wikipedia
 
 
-vf = open('versioninfo.json')
+vf = open('versioninfo.json', encoding='utf-8')
 opentoken = open("MilitaryData/token.json")
 
 #VERSION INFO ORG
