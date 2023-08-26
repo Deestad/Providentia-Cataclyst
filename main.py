@@ -127,6 +127,17 @@ async def self(interaction: discord.Interaction):
             await interaction.channel.edit(slowmode_delay=0)
             defensemode = False
 
+@tree.command(name="conversar",description="Como posso ajudar?",guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, mensagem: str):
+    blacklist = open('MilitaryData/enemyinfo.json')
+    blacklist = json.load(blacklist)
+    token = open('MilitaryData/token.json')
+    token = json.load(token)
+    if interaction.user.id in blacklist["whitelist"]:
+            await EmperorService(interaction, mensagem, token)
+    else:
+        embedVar = DefaultEmbed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
+        await interaction.response.send_message(embed=embedVar)
 
 if __name__ == '__main__':
     print("The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")

@@ -4,6 +4,8 @@ from discord import app_commands
 from discord.ext.commands import Bot
 import json
 import random, time
+import datetime
+import requests
 
 def DefaultEmbed(title,message):
     embedVar = discord.Embed(title=f"{title}", description=f"{message}", color=15548997)
@@ -12,6 +14,25 @@ def DefaultEmbed(title,message):
 
 vf = open('versioninfo.json')
 opentoken = open("MilitaryData/token.json")
+
+async def EmperorService(interaction, mensagem, token):
+    message = mensagem
+    str.lower(message)
+    str.replace(message, '?', '')
+    str.replace(message, '!', '')
+    str.replace(message, '.', '')
+
+    if "clima" or "chover" in message:
+        BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
+        API_KEY = token["openweather"]
+        CITY = "Chapecó"
+        url = f"{BASE_URL}appid={API_KEY}&q={CITY}&lang=pt&units=metric"
+        response = requests.get(url).json()
+        print(response)
+        embedVar = DefaultEmbed(f"{CITY}", f"Hoje teremos {response['weather'][0]['description']}. A temperatura máxima é de {response ['main']['temp_max']} e a mínima de {response['main']['temp_min']}.")
+        embedVar.add_field(name="Atualmente:", value=f"Está {response['main']['temp']}.")
+        embedVar.set_footer(text=f"'{mensagem}'")
+        await interaction.response.send_message(embed=embedVar)
 
 async def Genocideattack(target, message):
     target = message.author.id
