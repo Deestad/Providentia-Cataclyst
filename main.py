@@ -121,6 +121,7 @@ async def self(interaction: discord.Interaction):
             await interaction.response.send_message(embed=embedVar)
             await interaction.channel.edit(slowmode_delay=30)
             defensemode = True
+            await interaction.channel.send("https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmJoeGRpMDc2a2dvcTR1MHIwaXVoeDB4dTdqbzNybmJyeml0ZjV1dSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/d3mmEhXbo9SG4kzS/giphy.gif")
         else:
             embedVar = DefaultEmbed("Desativando modo de defesa.", "Desativação dos protocolos de defesa iniciada. Processo de encerramento em andamento. Revertendo sistemas de interceptação. Restaurando operações normais. Monitoramento de tráfego em declínio. Desligando firewalls adaptáveis. Retomando padrões regulares de tráfego. Confirmação da restauração da normalidade. Modo de defesa desativado com sucesso. Aguardando novas instruções.")
             await interaction.response.send_message(embed=embedVar)
