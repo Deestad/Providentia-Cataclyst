@@ -86,12 +86,29 @@ async def self(interaction: discord.Interaction):
 @tree.command(name="explicar",description="O que quer saber?",guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, searchquery: str):
     embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?","...")
-    await interaction.response.send_message(embed=embedVar,  ephemeral=True)
+    await interaction.response.send_message(embed=embedVar)
     wikipedia.set_lang("pt")
-    result = wikipedia.summary(searchquery, sentences=2)
-    message = (f"{result}")
-    embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?",message)
-    await interaction.edit_original_response(embed=embedVar)
+    if str.lower(searchquery) == ("providentia"):
+        embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?",
+                                "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
+        await interaction.edit_original_response(embed=embedVar)
+    else:
+        try:
+            result = wikipedia.summary(searchquery, sentences=2)
+            message = (f"{result}")
+            embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?",message)
+            await interaction.edit_original_response(embed=embedVar)
+        except Exception as e:
+            error = str(e)
+            print(error)
+            if "may refer to" in error:
+                message = ("Poderia ser mais específico? Vejo muitos resultados para o que busca.")
+                embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?", message)
+                await interaction.edit_original_response(embed=embedVar)
+            else:
+                message = ("Desculpe, não pude encontrar o que você está procurando.")
+                embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?", message)
+                await interaction.edit_original_response(embed=embedVar)
 
 if __name__ == '__main__':
     print(f"A versão é {version}")
