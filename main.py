@@ -5,6 +5,7 @@ from discord.ext.commands import Bot
 from MilitaryData.Operation.MilitaryOperations import *
 import json
 import random, time
+import wikipedia
 
 
 vf = open('versioninfo.json')
@@ -81,7 +82,16 @@ async def self(interaction: discord.Interaction):
         message = ("Você não tem permissão para executar este comando.")
         embedVar = DefaultEmbed(f"Providentia Type D {version}", message)
         await interaction.response.send_message(embed=embedVar)
-# Press the green button in the gutter to run the script.
+
+@tree.command(name="explicar",description="O que quer saber?",guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, searchquery: str):
+    embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?","...")
+    await interaction.response.send_message(embed=embedVar,  ephemeral=True)
+    wikipedia.set_lang("pt")
+    result = wikipedia.summary(searchquery, sentences=2)
+    message = (f"{result}")
+    embedVar = DefaultEmbed(f"Você quer aprender sobre {searchquery}?",message)
+    await interaction.edit_original_response(embed=embedVar)
 
 if __name__ == '__main__':
     print(f"A versão é {version}")
