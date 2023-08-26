@@ -7,7 +7,6 @@ import json
 import random, time
 import wikipedia
 
-
 vf = open('versioninfo.json', encoding='utf-8')
 opentoken = open("MilitaryData/token.json")
 
@@ -22,8 +21,10 @@ lasthighlight = versioninfo["lasthighlight"]
 intents = discord.Intents.default()
 intents.message_content = True
 
-activity = discord.Streaming(name=f"Prefixo: {prefix} - Providentia v.{version}, {versiontitle}.",
+activity = discord.Streaming(name=f"os segredos dos inimigos da Lygon. Providentia v.{version}, {versiontitle}.",
                              url="https://www.youtube.com/watch?v=0W2kXsQ5ZYc")
+
+
 global genocidemode
 genocidemode = False
 global defensemode
@@ -44,6 +45,8 @@ class aclient(discord.Client):
         await self.wait_until_ready()
         if not self.synced:
             await tree.sync(guild = discord.Object(id =696830110493573190))
+        await self.change_presence(activity=activity)
+
     async def on_message(self, message):
         blacklist = open('MilitaryData/enemyinfo.json')
         blacklist = json.load(blacklist)
@@ -143,6 +146,8 @@ async def self(interaction: discord.Interaction, mensagem: str):
 if __name__ == '__main__':
     print("The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     print(f"A versão é {version}")
+
+
     client.run(token)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
