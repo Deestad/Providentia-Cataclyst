@@ -5,6 +5,8 @@ from discord.ext.commands import Bot
 from MilitaryData.Operation.MilitaryOperations import *
 import json
 import random, time
+
+
 vf = open('versioninfo.json')
 opentoken = open("MilitaryData/token.json")
 
@@ -59,22 +61,26 @@ async def self(interaction: discord.Interaction):
 
 @tree.command(name ="genocide", description="Ativar modo de massacre sem discriminação.", guild = discord.Object(id =696830110493573190))
 async def self(interaction: discord.Interaction):
-    global genocidemode
-    if genocidemode is False:
-        message = ("Alerta de Segurança: Modo de Exterminação ativado. Os sistemas de drones são autorizados a empregar força letal, conforme diretrizes estabelecidas.")
+    if interaction.permissions.administrator:
+        global genocidemode
+        if genocidemode is False:
+            message = ("Alerta de Segurança: Modo de Exterminação ativado. Os sistemas de drones são autorizados a empregar força letal.")
+            embedVar = DefaultEmbed(f"Providentia Type D {version}", message)
+            await interaction.response.send_message(embed=embedVar)
+            await interaction.channel.send("https://64.media.tumblr.com/57d7bc4b3e8aa16b9b0b01e826f7e748/58cf62c3ad4a24e5-b9/s540x810/9cd3bf712e85af23845f0e2b8371917415874229.gif")
+            genocidemode = True
+            return genocidemode
+        elif genocidemode is True:
+            message = ("Modo de Exterminação desativado. Os sistemas de defesa perimetral são restaurados a um estado de alerta normal, alinhados com o nível de ameaça corrente.")
+            embedVar = DefaultEmbed(f"Providentia Type D {version}", message)
+            await interaction.response.send_message(embed=embedVar)
+            await interaction.channel.send("https://thumbs.gfycat.com/ColorlessElegantHalcyon-size_restricted.gif")
+            genocidemode = False
+            return genocidemode
+    else:
+        message = ("Você não tem permissão para executar este comando.")
         embedVar = DefaultEmbed(f"Providentia Type D {version}", message)
         await interaction.response.send_message(embed=embedVar)
-        await interaction.channel.send("https://64.media.tumblr.com/57d7bc4b3e8aa16b9b0b01e826f7e748/58cf62c3ad4a24e5-b9/s540x810/9cd3bf712e85af23845f0e2b8371917415874229.gif")
-        genocidemode = True
-        return genocidemode
-    elif genocidemode is True:
-        message = ("Modo de Exterminação desativado. Os sistemas de defesa perimetral são restaurados a um estado de alerta normal, alinhados com o nível de ameaça corrente.")
-        embedVar = DefaultEmbed(f"Providentia Type D {version}", message)
-        await interaction.response.send_message(embed=embedVar)
-        await interaction.channel.send("https://thumbs.gfycat.com/ColorlessElegantHalcyon-size_restricted.gif")
-        genocidemode = False
-        return genocidemode
-
 # Press the green button in the gutter to run the script.
 
 if __name__ == '__main__':
