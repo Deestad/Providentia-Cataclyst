@@ -1,3 +1,4 @@
+import sqlite3
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -6,6 +7,9 @@ import json
 import random, time
 import datetime
 import requests
+from insultgenerator import phrases
+from googletrans import Translator, constants
+
 
 def DefaultEmbed(title,message):
     embedVar = discord.Embed(title=f"{title}", description=f"{message}", color=15548997)
@@ -15,14 +19,22 @@ def DefaultEmbed(title,message):
 vf = open('versioninfo.json')
 opentoken = open("MilitaryData/token.json")
 
-async def EmperorService(interaction, mensagem, token):
-    message = mensagem
+async def EmperorService(interaction, mensagem, token, conn, cur):
+    message = str(mensagem)
+    print(message)
     str.lower(message)
     str.replace(message, '?', '')
     str.replace(message, '!', '')
     str.replace(message, '.', '')
 
-    if "clima" or "chover" in message:
+    ordemdeinsultar = cur.execute('''SELECT palavra FROM dicionario
+                       WHERE significado = "insultar"''')
+    ordensdeinsultar = []
+    for ordens in ordemdeinsultar:
+        ordensdeinsultar.append(ordens)
+    print(ordensdeinsultar)
+
+    if "clima" in message or "chover" in message:
         BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
         API_KEY = token["openweather"]
         CITY = "Chapecó"
@@ -33,6 +45,23 @@ async def EmperorService(interaction, mensagem, token):
         embedVar.add_field(name="Atualmente:", value=f"Está {response['main']['temp']}.")
         embedVar.set_footer(text=f"'{mensagem}'")
         await interaction.response.send_message(embed=embedVar)
+        messagesent = True
+    if any(message in ordensdeinsultar for message in ordensdeinsultar):
+        translator = Translator()
+        xingamento = phrases.get_so_insult_with_action_and_target("Your Mom", "she")
+        xingamento = translator.translate(xingamento, src="en", dest="pt")
+        xingamento = xingamento.text
+
+        try:
+            embedVar
+            while messagesent is True:
+                embedVar.add_field(name="E para concluir...", value=xingamento)
+                await interaction.edit_original_response(embed=embedVar)
+                break
+        except:
+            embedVar = DefaultEmbed(f"Sim, senhor!", xingamento)
+            await interaction.response.send_message(embed=embedVar)
+
 
 async def Genocideattack(target, message):
     target = message.author.id

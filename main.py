@@ -6,6 +6,19 @@ from MilitaryData.Operation.MilitaryOperations import *
 import json
 import random, time
 import wikipedia
+import sqlite3
+
+# SQL LITE DATABASE
+conn = sqlite3.connect("MilitaryData/memory.db")
+
+cur = conn.cursor()
+
+conn.execute('''CREATE TABLE IF NOT EXISTS dicionario
+                (palavra TEXT, significado TEXT)''')
+
+
+
+#>>
 
 vf = open('versioninfo.json', encoding='utf-8')
 opentoken = open("MilitaryData/token.json")
@@ -138,16 +151,38 @@ async def self(interaction: discord.Interaction, mensagem: str):
     token = open('MilitaryData/token.json')
     token = json.load(token)
     if interaction.user.id in blacklist["whitelist"]:
-            await EmperorService(interaction, mensagem, token)
+            await EmperorService(interaction, mensagem, token, conn, cur)
     else:
         embedVar = DefaultEmbed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
         await interaction.response.send_message(embed=embedVar)
 
+@tree.command(name="ensinar",description="Quer me ensinar uma palavra?",guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, palavra: str, tipo: str):
+    blacklist = open('MilitaryData/enemyinfo.json')
+    blacklist = json.load(blacklist)
+    if interaction.user.id in blacklist["whitelist"]:
+        insertion = [palavra, tipo]
+        try:
+            cur.execute(f'''
+                INSERT INTO dicionario (palavra, significado) VALUES (?, ?)
+            
+            ''', insertion)
+            conn.commit()
+            embedVar = DefaultEmbed("Operação concluída.", f"Certo, você me ensinou a palavra {palavra} do tipo {tipo}.")
+            await interaction.response.send_message(embed=embedVar)
+        except ValueError:
+            embedVar = DefaultEmbed("Operação falhou.",
+                                    f"Senhor, capturei um erro. {ValueError}.")
+            await interaction.response.send_message(embed=embedVar)
+
+
 if __name__ == '__main__':
     print("The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     print(f"A versão é {version}")
-
-
     client.run(token)
+
+cur.close()
+conn.close()
+
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
