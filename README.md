@@ -18,7 +18,6 @@ This remarkable bot, **Providentia - Type D**, is the brainchild of the illustri
 ### How to Invite Providentia to Your Server
 To invite Providentia to your Discord server, click on the following link: [Invite Providentia - Type D](https://discord.com/oauth2/authorize/?permissions=8&scope=bot&client_id=915248692963987479)
 
-
 ### Contributing
 We welcome contributions from the community to further enhance Providentia's capabilities. If you're interested in contributing, please follow our [contribution guidelines](link_to_contrib_guidelines).
 
