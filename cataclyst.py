@@ -1,4 +1,5 @@
 import discord
+import sympy
 from discord.ext import commands
 from discord import app_commands
 from discord.ext.commands import Bot
@@ -7,9 +8,8 @@ import random, time
 import wikipedia
 import sqlite3
 import os, io
-import numpy
-
-
+import numpy as np
+from sympy import *
 class MainExecution:
 
     def __init__(self):
@@ -94,7 +94,7 @@ async def self(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embedVar)
 
 @tree.command(name="arithmetic",
-                      description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?", guild = discord.Object(id =696830110493573190))
+                      description="Resolução de problemas simples de matemática básica.", guild = discord.Object(id =696830110493573190))
 async def self(interaction: discord.Interaction, expression:str):
     whitelist = user_info["whitelist"]
     default_embed = MainExecution().defaultembed
@@ -105,6 +105,27 @@ async def self(interaction: discord.Interaction, expression:str):
     else:
         embedVar = default_embed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
         await interaction.response.send_message(embed=embedVar)
+
+@tree.command(name="equation",
+                      description="Resolução de equações de primeiro grau de uma variável 'x'.", guild = discord.Object(id =696830110493573190))
+async def self(interaction: discord.Interaction, leftside:str, equals:int):
+    x = Symbol('x')
+    default_embed = MainExecution().defaultembed
+    expression = sympy.sympify(leftside)
+    equation = solve((expression, equals), x)
+
+    print(expression)
+    print(equation)
+    equation_format = str(equation)
+    equation_format = equation_format.replace('sqrt', '√')
+    equation_format = equation_format.replace('[', '')
+    equation_format = equation_format.replace(']', '')
+
+
+    embedVar = default_embed(f"Dada a equação, {expression} = {equals}:", f"O resultado é(são): {equation_format}")
+    await interaction.response.send_message(embed=embedVar)
+
+    default_embed = MainExecution().defaultembed
 
 if __name__ == '__main__':
     MainExecution()
