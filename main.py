@@ -62,7 +62,7 @@ class aclient(discord.Client):
         await self.change_presence(activity=activity)
 
     async def on_message(self, message):
-        blacklist = open('MilitaryData/enemyinfo.json')
+        blacklist = open('MilitaryData/userinfo.json')
         blacklist = json.load(blacklist)
 
         if (message.author.id in blacklist["jambonians"] or genocidemode == True):
@@ -147,7 +147,7 @@ async def self(interaction: discord.Interaction):
 
 @tree.command(name="conversar",description="Como posso ajudar?",guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, mensagem: str):
-    blacklist = open('MilitaryData/enemyinfo.json')
+    blacklist = open('MilitaryData/userinfo.json')
     blacklist = json.load(blacklist)
     token = open('MilitaryData/token.json')
     token = json.load(token)
@@ -159,7 +159,7 @@ async def self(interaction: discord.Interaction, mensagem: str):
 
 @tree.command(name="ensinar",description="Quer me ensinar uma palavra?",guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, palavra: str, tipo: str):
-    blacklist = open('MilitaryData/enemyinfo.json')
+    blacklist = open('MilitaryData/userinfo.json')
     blacklist = json.load(blacklist)
     if interaction.user.id in blacklist["whitelist"]:
         insertion = [palavra, tipo]

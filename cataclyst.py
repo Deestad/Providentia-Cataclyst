@@ -7,6 +7,7 @@ import random, time
 import wikipedia
 import sqlite3
 import os, io
+import numpy
 
 
 class MainExecution:
@@ -19,6 +20,7 @@ class MainExecution:
         self.activity = None
 
         self.setversioninfo()
+        self.setuserinfo()
 
 
     def tokenload(self):
@@ -40,6 +42,10 @@ class MainExecution:
             token = token["token"]
             return token
 
+    def setuserinfo(self):
+        user_info = open("MilitaryData/userinfo.json")
+        user_info = json.load(user_info)
+        return user_info
     def setversioninfo(self):
         version_info = open('versioninfo.json', encoding='utf-8')
         self.version_info = json.load(version_info)
@@ -76,7 +82,7 @@ class aclient(discord.Client):
 client = aclient()
 tree = app_commands.CommandTree(client)
 version_info = MainExecution().setversioninfo()
-
+user_info = MainExecution().setuserinfo()
 @tree.command(name="version",
                       description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?", guild = discord.Object(id =696830110493573190))
 async def self(interaction: discord.Interaction):
@@ -86,7 +92,19 @@ async def self(interaction: discord.Interaction):
         Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. O ping é de {client.latency * 1000} ms''')
     embedVar = default_embed(f"Providentia Type D {version_info['version']}", message)
     await interaction.response.send_message(embed=embedVar)
-        # Press the green button in the gutter to run the script.
+
+@tree.command(name="arithmetic",
+                      description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?", guild = discord.Object(id =696830110493573190))
+async def self(interaction: discord.Interaction, expression:str):
+    whitelist = user_info["whitelist"]
+    default_embed = MainExecution().defaultembed
+    if interaction.user.id in whitelist:
+        resultado = eval(expression)
+        embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
+        await interaction.response.send_message(embed=embedVar)
+    else:
+        embedVar = default_embed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
+        await interaction.response.send_message(embed=embedVar)
 
 if __name__ == '__main__':
     MainExecution()
