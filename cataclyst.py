@@ -110,21 +110,29 @@ async def self(interaction: discord.Interaction, expression:str):
 @tree.command(name="equation",
                       description="Resolução de equações de primeiro grau de uma variável 'x'.", guild = discord.Object(id =696830110493573190))
 async def self(interaction: discord.Interaction, leftside:str, equals:int):
-    x = Symbol('x')
-    default_embed = MainExecution().defaultembed
-    expression = sympy.sympify(leftside)
-    equation = solve((expression, equals), x)
+    try:
+        x = Symbol('x')
+        default_embed = MainExecution().defaultembed
+        expression = sympy.sympify(leftside)
+        equation = solve((expression, equals), x)
 
-    print(expression)
-    print(equation)
-    equation = equation[x]
-    expression_format = str(expression)
-    expression_format = expression_format.replace('*x', 'x')
+        print(expression)
+        print(equation)
+        equation = equation[x]
+        expression_format = str(expression)
+        expression_format = expression_format.replace('*x', 'x')
 
-    embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado: {equation}, ou: {N(equation)}")
-    await interaction.response.send_message(embed=embedVar)
+        embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado: {equation}, ou: {N(equation)}")
+        await interaction.response.send_message(embed=embedVar)
 
-    default_embed = MainExecution().defaultembed
+        default_embed = MainExecution().defaultembed
+    except Exception as e:
+        erro = str(e)
+
+        if "Sympify of expression 'could not parse" in erro:
+            embedVar = default_embed(f"Erro. {leftside} = {equals} não é uma expressão válida.",
+                                     f"Verifique a sintaxe e tente novamente.")
+            await interaction.response.send_message(embed=embedVar)
 
 @tree.command(name="average",
                       description="Calculo de médias. Separe por vírgulas.", guild = discord.Object(id =696830110493573190))
