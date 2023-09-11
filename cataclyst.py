@@ -118,11 +118,12 @@ async def self(interaction: discord.Interaction, searchquery: str):
             message = f"{result}"
             embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
             await interaction.edit_original_response(embed=embedVar)
+            await interaction.channel.send(wikipedia.page(searchquery).images[0])
         except Exception as e:
             error = str(e)
             print(error)
             if "may refer to" in error:
-                message = (f"Poderia ser mais específico? Vejo muitos resultados para o que busca. \n \n {e}")
+                message = (f"Poderia ser mais específico? Vejo muitos resultados para o que busca. \n \n {str(e).replace('may refer to:', 'pode se referir à:')}")
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
             else:
