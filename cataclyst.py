@@ -141,9 +141,14 @@ async def self(interaction: discord.Interaction, expression: str):
     whitelist = user_info["whitelist"]
     default_embed = MainExecution().defaultembed
     if interaction.user.id in whitelist:
-        resultado = eval(expression)
-        embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
-        await interaction.response.send_message(embed=embedVar)
+        try:
+            resultado = eval(expression)
+            embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
+            await interaction.response.send_message(embed=embedVar)
+        except NameError:
+            embedVar = default_embed(f"Erro.", f"Insira uma expressão válida.")
+            await interaction.response.send_message(embed=embedVar)
+
     else:
         embedVar = default_embed("Você não tem permissão para usar este comando.",
                                  "Desculpe, somemente respondo à Lys.")
@@ -171,36 +176,38 @@ async def self(interaction: discord.Interaction, leftside: str, equals: int):
         await interaction.response.send_message(embed=embedVar)
 
         default_embed = MainExecution().defaultembed
-    except Exception as e:
-        erro = str(e)
-
-        if "Sympify of expression 'could not parse" in erro:
-            embedVar = default_embed(f"Erro. {leftside} = {equals} não é uma expressão válida.",
+    except ValueError:
+        embedVar = default_embed(f"Erro. {leftside} = {equals} não é uma expressão válida.",
                                      f"Verifique a sintaxe e tente novamente.")
-            await interaction.response.send_message(embed=embedVar)
+        await interaction.response.send_message(embed=embedVar)
 
 
 @tree.command(name="average",
               description="Calculo de médias. Separe por vírgulas.", guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, items: str):
-    default_embed = MainExecution().defaultembed
 
-    lista_formatada = items
-    lista_formatada = lista_formatada.replace(',', ', ')
-    items = items.replace(' ', '')
-    items = items.split(',')
-    numeros = []
+    try:
+        lista_formatada = items
+        lista_formatada = lista_formatada.replace(',', ', ')
+        items = items.replace(' ', '')
+        items = items.split(',')
+        numeros = []
 
-    for item in items:
-        item = int(item)
-        numeros.append(item)
+        for item in items:
+            item = int(item)
+            numeros.append(item)
+        resultado = statistics.fmean(numeros)
+        default_embed = MainExecution().defaultembed
 
-    resultado = statistics.fmean(numeros)
+        embedVar = default_embed(f"Para os números, {lista_formatada}:", f"É dada a média {resultado}.")
+        await interaction.response.send_message(embed=embedVar)
+    except ValueError:
+        default_embed = MainExecution().defaultembed
+        embedVar = default_embed(f"Valor inválido.", f"Insira uma lista de números separados por vírgulas.")
+        await interaction.response.send_message(embed=embedVar)
 
-    default_embed = MainExecution().defaultembed
 
-    embedVar = default_embed(f"Para os números, {lista_formatada}:", f"É dada a média {resultado}.")
-    await interaction.response.send_message(embed=embedVar)
+
 
 
 if __name__ == '__main__':
