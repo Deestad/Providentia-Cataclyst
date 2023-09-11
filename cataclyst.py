@@ -116,13 +116,11 @@ async def self(interaction: discord.Interaction, leftside:str, equals:int):
 
     print(expression)
     print(equation)
-    equation_format = str(equation)
-    equation_format = equation_format.replace('sqrt', '√')
-    equation_format = equation_format.replace('[', '')
-    equation_format = equation_format.replace(']', '')
+    equation = equation[x]
+    expression_format = str(expression)
+    expression_format = expression_format.replace('*x', 'x')
 
-
-    embedVar = default_embed(f"Dada a equação, {expression} = {equals}:", f"O resultado é(são): {equation_format}")
+    embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado = {equation}, ou: {N(equation)}")
     await interaction.response.send_message(embed=embedVar)
 
     default_embed = MainExecution().defaultembed
