@@ -11,6 +11,8 @@ import os, io
 import numpy as np
 from sympy import *
 import statistics
+
+
 class MainExecution:
 
     def __init__(self):
@@ -22,7 +24,6 @@ class MainExecution:
 
         self.setversioninfo()
         self.setuserinfo()
-
 
     def tokenload(self):
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):
@@ -47,6 +48,7 @@ class MainExecution:
         user_info = open("MilitaryData/userinfo.json")
         user_info = json.load(user_info)
         return user_info
+
     def setversioninfo(self):
         version_info = open('versioninfo.json', encoding='utf-8')
         self.version_info = json.load(version_info)
@@ -73,10 +75,12 @@ class aclient(discord.Client):
         await self.wait_until_ready()
         if not self.synced:
             await tree.sync(guild=discord.Object(id=696830110493573190))
-        await self.change_presence(status= discord.Status.dnd, activity=(discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
+        await self.change_presence(status=discord.Status.dnd, activity=(
+            discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
 
     async def on_message(self, message):
         pass
+
 
 # EVENTS
 
@@ -84,25 +88,29 @@ client = aclient()
 tree = app_commands.CommandTree(client)
 version_info = MainExecution().setversioninfo()
 user_info = MainExecution().setuserinfo()
+
+
 @tree.command(name="version",
-                      description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?", guild = discord.Object(id =696830110493573190))
+              description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
+              guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction):
     default_embed = MainExecution().defaultembed
     message = (
-    f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
+        f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
         Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. O ping é de {client.latency * 1000} ms''')
     embedVar = default_embed(f"Providentia Type D {version_info['version']}", message)
     await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name="explain",description="O que quer saber?",guild=discord.Object(id=696830110493573190))
+
+@tree.command(name="explain", description="O que quer saber?", guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, searchquery: str):
     default_embed = MainExecution().defaultembed
-    embedVar = (f"Você quer aprender sobre {searchquery}?","...")
+    embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", "...")
     await interaction.response.send_message(embed=embedVar)
     wikipedia.set_lang("pt")
     if str.lower(searchquery) == ("providentia"):
         embedVar = default_embed(f"Você quer aprender sobre {searchquery}?",
-                                "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
+                                 "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
         await interaction.edit_original_response(embed=embedVar)
     else:
         try:
@@ -114,16 +122,19 @@ async def self(interaction: discord.Interaction, searchquery: str):
             error = str(e)
             print(error)
             if "may refer to" in error:
-                message = ("Poderia ser mais específico? Vejo muitos resultados para o que busca.")
+                message = (f"Poderia ser mais específico? Vejo muitos resultados para o que busca. \n \n {e}")
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
             else:
                 message = ("Desculpe, não pude encontrar o que você está procurando.")
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
+
+
 @tree.command(name="arithmetic",
-                      description="Resolução de problemas simples de matemática básica.", guild = discord.Object(id =696830110493573190))
-async def self(interaction: discord.Interaction, expression:str):
+              description="Resolução de problemas simples de matemática básica.",
+              guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, expression: str):
     whitelist = user_info["whitelist"]
     default_embed = MainExecution().defaultembed
     if interaction.user.id in whitelist:
@@ -131,12 +142,15 @@ async def self(interaction: discord.Interaction, expression:str):
         embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
         await interaction.response.send_message(embed=embedVar)
     else:
-        embedVar = default_embed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
+        embedVar = default_embed("Você não tem permissão para usar este comando.",
+                                 "Desculpe, somemente respondo à Lys.")
         await interaction.response.send_message(embed=embedVar)
 
+
 @tree.command(name="equation",
-                      description="Resolução de equações de primeiro grau de uma variável 'x'.", guild = discord.Object(id =696830110493573190))
-async def self(interaction: discord.Interaction, leftside:str, equals:int):
+              description="Resolução de equações de primeiro grau de uma variável 'x'.",
+              guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, leftside: str, equals: int):
     try:
         x = Symbol('x')
         default_embed = MainExecution().defaultembed
@@ -149,7 +163,8 @@ async def self(interaction: discord.Interaction, leftside:str, equals:int):
         expression_format = str(expression)
         expression_format = expression_format.replace('*x', 'x')
 
-        embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado: {equation}, ou: {N(equation)}")
+        embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:",
+                                 f"Resultado: {equation}, ou: {N(equation)}")
         await interaction.response.send_message(embed=embedVar)
 
         default_embed = MainExecution().defaultembed
@@ -161,9 +176,10 @@ async def self(interaction: discord.Interaction, leftside:str, equals:int):
                                      f"Verifique a sintaxe e tente novamente.")
             await interaction.response.send_message(embed=embedVar)
 
+
 @tree.command(name="average",
-                      description="Calculo de médias. Separe por vírgulas.", guild = discord.Object(id =696830110493573190))
-async def self(interaction: discord.Interaction, items:str):
+              description="Calculo de médias. Separe por vírgulas.", guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, items: str):
     default_embed = MainExecution().defaultembed
 
     lista_formatada = items
