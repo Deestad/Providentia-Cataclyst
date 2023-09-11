@@ -12,6 +12,8 @@ import numpy as np
 from sympy import *
 import statistics
 
+conn = sqlite3.connect("MilitaryData/memory.db")
+cur = conn.cursor()
 
 class MainExecution:
 
@@ -24,6 +26,22 @@ class MainExecution:
 
         self.setversioninfo()
         self.setuserinfo()
+        self.initializedatabase()
+
+
+    def checkwhitelist(self, userid):
+        whitelist = cur.execute('''SELECT userid FROM whitelist;
+        
+        ''').fetchone()
+        id_check = any(userid in whitelist for users in whitelist)
+        if id_check:
+            print("Whitelisted user used a command.")
+        return id_check
+
+    def initializedatabase(self):
+        cur.execute('''
+                    CREATE TABLE IF NOT EXISTS whitelist(userid INT);
+        ''')
 
     def tokenload(self):
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):
@@ -60,7 +78,8 @@ class MainExecution:
         return self.version_info
 
     def defaultembed(self, title, message):
-        self.embed_configuration = discord.Embed(title=f"{title}", description=f"{message}", color=0xb603fc)
+
+        self.embed_configuration = discord.Embed(title=f"{title}", description=f"{message}", color=0x2ecc71)
         self.embed_configuration.set_author(name="PLYG-7X42",
                                             icon_url="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/9f1ed69b-9e98-4f78-acda-c95c6f4be159/db73tp3-8c5589a6-051c-4408-b244-f451c599b04d.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzlmMWVkNjliLTllOTgtNGY3OC1hY2RhLWM5NWM2ZjRiZTE1OVwvZGI3M3RwMy04YzU1ODlhNi0wNTFjLTQ0MDgtYjI0NC1mNDUxYzU5OWIwNGQuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.7X4JjtqAwnetH9HC9f4sl3kcik8VCFCE5nr1MGB607M")
         return self.embed_configuration
@@ -88,8 +107,6 @@ client = aclient()
 tree = app_commands.CommandTree(client)
 version_info = MainExecution().setversioninfo()
 user_info = MainExecution().setuserinfo()
-
-
 @tree.command(name="version",
               description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
               guild=discord.Object(id=696830110493573190))
@@ -119,13 +136,14 @@ async def self(interaction: discord.Interaction, searchquery: str):
             embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
             await interaction.edit_original_response(embed=embedVar)
             images = wikipedia.page(searchquery).images
-            result_image = [image for image in images if f"{searchquery.replace(' ','')}" and '.svg' not in image][0]
+            result_image = [image for image in images if f"{searchquery.replace(' ', '')}" and '.svg' not in image][0]
             await interaction.channel.send(result_image)
         except Exception as e:
             error = str(e)
             print(error)
             if "may refer to" in error:
-                message = (f"Poderia ser mais específico? Vejo muitos resultados para o que busca. \n \n {str(e).replace('may refer to:', 'pode se referir à:')}")
+                message = (
+                    f"Poderia ser mais específico? Vejo muitos resultados para o que busca. \n \n {str(e).replace('may refer to:', 'pode se referir à:')}")
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
             else:
@@ -138,9 +156,9 @@ async def self(interaction: discord.Interaction, searchquery: str):
               description="Resolução de problemas simples de matemática básica.",
               guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, expression: str):
-    whitelist = user_info["whitelist"]
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
-    if interaction.user.id in whitelist:
+    if whitelisted:
         try:
             resultado = eval(expression)
             embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
@@ -178,14 +196,13 @@ async def self(interaction: discord.Interaction, leftside: str, equals: int):
         default_embed = MainExecution().defaultembed
     except ValueError:
         embedVar = default_embed(f"Erro. {leftside} = {equals} não é uma expressão válida.",
-                                     f"Verifique a sintaxe e tente novamente.")
+                                 f"Verifique a sintaxe e tente novamente.")
         await interaction.response.send_message(embed=embedVar)
 
 
 @tree.command(name="average",
               description="Calculo de médias. Separe por vírgulas.", guild=discord.Object(id=696830110493573190))
 async def self(interaction: discord.Interaction, items: str):
-
     try:
         lista_formatada = items
         lista_formatada = lista_formatada.replace(',', ', ')
@@ -207,6 +224,57 @@ async def self(interaction: discord.Interaction, items: str):
         await interaction.response.send_message(embed=embedVar)
 
 
+@tree.command(name="whitelist",
+              description="Adicionar usuário a lista de operações da Providentia.",
+              guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, id: str, add_remove: str):
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    default_embed = MainExecution().defaultembed
+    if whitelisted:
+        try:
+            id = int(id)
+            if add_remove == 'add':
+                try:
+                    cur.execute('''
+                                INSERT INTO whitelist (userid) VALUES (?)
+                    
+                    
+                    ''', (id,))
+                    conn.commit()
+                    embedVar = default_embed(f"Sucesso.", f"Usuário adicionado na Whitelist.")
+                    await interaction.response.send_message(embed=embedVar)
+                except ValueError:
+                    embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
+                    await interaction.response.send_message(embed=embedVar)
+                except Exception as e:
+                    print(e)
+
+
+            elif add_remove == 'remove':
+                id = int(id)
+                try:
+                    cur.execute(f'''
+                                                DELETE FROM whitelist       
+                                                WHERE userid = {id}
+
+
+                                    ''')
+                    conn.commit()
+                    embedVar = default_embed(f"Sucesso.", f"Usuário removido da Whitelist.")
+                    await interaction.response.send_message(embed=embedVar)
+                except ValueError:
+                    embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
+                    await interaction.response.send_message(embed=embedVar)
+                except Exception as e:
+                    print(e)
+            else:
+                pass
+        except ValueError:
+            embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
+            await interaction.response.send_message(embed=embedVar)
+    else:
+        embedVar = default_embed(f"Você não tem permissão para usar este comando.", f"Você está fora da whitelist.")
+        await interaction.response.send_message(embed=embedVar)
 
 
 
@@ -214,3 +282,6 @@ if __name__ == '__main__':
     MainExecution()
     token = MainExecution().tokenload()
     client.run(token)
+
+conn.close()
+cur.close()
