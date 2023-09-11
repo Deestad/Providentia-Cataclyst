@@ -10,6 +10,7 @@ import sqlite3
 import os, io
 import numpy as np
 from sympy import *
+import statistics
 class MainExecution:
 
     def __init__(self):
@@ -120,10 +121,33 @@ async def self(interaction: discord.Interaction, leftside:str, equals:int):
     expression_format = str(expression)
     expression_format = expression_format.replace('*x', 'x')
 
-    embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado = {equation}, ou: {N(equation)}")
+    embedVar = default_embed(f"Dada a equação, {expression_format} = {equals}:", f"Resultado: {equation}, ou: {N(equation)}")
     await interaction.response.send_message(embed=embedVar)
 
     default_embed = MainExecution().defaultembed
+
+@tree.command(name="average",
+                      description="Calculo de médias. Separe por vírgulas.", guild = discord.Object(id =696830110493573190))
+async def self(interaction: discord.Interaction, items:str):
+    default_embed = MainExecution().defaultembed
+
+    lista_formatada = items
+    lista_formatada = lista_formatada.replace(',', ', ')
+    items = items.replace(' ', '')
+    items = items.split(',')
+    numeros = []
+
+    for item in items:
+        item = int(item)
+        numeros.append(item)
+
+    resultado = statistics.fmean(numeros)
+
+    default_embed = MainExecution().defaultembed
+
+    embedVar = default_embed(f"Para os números, {lista_formatada}:", f"É dada a média {resultado}.")
+    await interaction.response.send_message(embed=embedVar)
+
 
 if __name__ == '__main__':
     MainExecution()
