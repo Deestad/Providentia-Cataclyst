@@ -118,7 +118,9 @@ async def self(interaction: discord.Interaction, searchquery: str):
             message = f"{result}"
             embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
             await interaction.edit_original_response(embed=embedVar)
-            await interaction.channel.send(wikipedia.page(searchquery).images[0])
+            images = wikipedia.page(searchquery).images
+            result_image = [image for image in images if f"{searchquery.replace(' ','')}" and '.svg' not in image][0]
+            await interaction.channel.send(result_image)
         except Exception as e:
             error = str(e)
             print(error)
