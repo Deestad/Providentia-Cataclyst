@@ -1,3 +1,5 @@
+import ast
+
 import discord
 import sympy
 from discord.ext import commands
@@ -33,7 +35,8 @@ class MainExecution:
         whitelist = cur.execute('''SELECT userid FROM whitelist;
         
         ''').fetchone()
-        id_check = any(userid in whitelist for users in whitelist)
+        print(whitelist)
+        id_check = any(user == userid in whitelist for user in whitelist)
         if id_check:
             print("Whitelisted user used a command.")
         return id_check
@@ -160,7 +163,7 @@ async def self(interaction: discord.Interaction, expression: str):
     default_embed = MainExecution().defaultembed
     if whitelisted:
         try:
-            resultado = eval(expression)
+            resultado = ast.literal_eval(expression)
             embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
             await interaction.response.send_message(embed=embedVar)
         except NameError:
@@ -169,7 +172,7 @@ async def self(interaction: discord.Interaction, expression: str):
 
     else:
         embedVar = default_embed("Você não tem permissão para usar este comando.",
-                                 "Desculpe, somemente respondo à Lys.")
+                                 "Usuário fora da Whitelist.")
         await interaction.response.send_message(embed=embedVar)
 
 
@@ -255,7 +258,7 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
                 try:
                     cur.execute(f'''
                                                 DELETE FROM whitelist       
-                                                WHERE userid = {id}
+                                                WHERE userid = '{id}'
 
 
                                     ''')
