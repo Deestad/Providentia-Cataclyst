@@ -30,13 +30,13 @@ class MainExecution:
         self.setuserinfo()
         self.initializedatabase()
 
-
+    # NEEDS FIXING
     def checkwhitelist(self, userid):
         whitelist = cur.execute('''SELECT userid FROM whitelist;
         
         ''').fetchone()
         print(whitelist)
-        id_check = any(user == userid in whitelist for user in whitelist)
+        id_check = any(userid in user for user in whitelist)
         if id_check:
             print("Whitelisted user used a command.")
         return id_check
