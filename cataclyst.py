@@ -30,13 +30,15 @@ class MainExecution:
         self.setuserinfo()
         self.initializedatabase()
 
-    # NEEDS FIXING
     def checkwhitelist(self, userid):
+
         whitelist = cur.execute('''SELECT userid FROM whitelist;
         
         ''').fetchone()
+
+        userid = str(userid)
         print(whitelist)
-        id_check = any(userid in user for user in whitelist)
+        id_check = any(user in userid for user in whitelist)
         if id_check:
             print("Whitelisted user used a command.")
         return id_check
@@ -235,22 +237,33 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
     default_embed = MainExecution().defaultembed
     if whitelisted:
         try:
+            userid = id
             id = int(id)
             if add_remove == 'add':
-                try:
-                    cur.execute('''
-                                INSERT INTO whitelist (userid) VALUES (?)
-                    
-                    
-                    ''', (id,))
-                    conn.commit()
-                    embedVar = default_embed(f"Sucesso.", f"Usuário adicionado na Whitelist.")
+                whitelist = cur.execute(f'''SELECT userid FROM whitelist
+                                            WHERE userid = {id}
+
+                                                ''').fetchone()
+                print(whitelist)
+                if not whitelist:
+                    try:
+                        cur.execute('''
+                                    INSERT INTO whitelist (userid) VALUES (?)
+                        
+                        
+                        ''', (id,))
+                        conn.commit()
+                        embedVar = default_embed(f"Sucesso.", f"<@{userid}> adicionado na Whitelist.")
+                        await interaction.response.send_message(embed=embedVar)
+                    except ValueError:
+                        embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
+                        await interaction.response.send_message(embed=embedVar)
+                    except Exception as e:
+                        print(e)
+                else:
+                    embedVar = default_embed(f"Não pude usar este comando.",
+                                             f"Usuário já está na Whitelist.")
                     await interaction.response.send_message(embed=embedVar)
-                except ValueError:
-                    embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
-                    await interaction.response.send_message(embed=embedVar)
-                except Exception as e:
-                    print(e)
 
 
             elif add_remove == 'remove':
@@ -258,8 +271,7 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
                 try:
                     cur.execute(f'''
                                                 DELETE FROM whitelist       
-                                                WHERE userid = '{id}'
-
+                                                WHERE userid = {id};
 
                                     ''')
                     conn.commit()
