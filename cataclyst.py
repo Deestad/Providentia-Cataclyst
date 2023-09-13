@@ -1,7 +1,9 @@
 import ast
+import typing
 
 import discord
 import sympy
+from discord.app_commands import Choice
 from discord.ext import commands
 from discord import app_commands
 from discord.ext.commands import Bot
@@ -13,9 +15,16 @@ import os, io
 import numpy as np
 from sympy import *
 import statistics
+import typing
 
 conn = sqlite3.connect("MilitaryData/memory.db")
 cur = conn.cursor()
+
+listaderps = cur.execute(f'''
+            SELECT titulo FROM rps
+        ''').fetchone()
+
+
 
 class MainExecution:
 
@@ -47,6 +56,15 @@ class MainExecution:
         cur.execute('''
                     CREATE TABLE IF NOT EXISTS whitelist(userid INT);
         ''')
+        cur.execute('''
+                            CREATE TABLE IF NOT EXISTS rps(titulo TEXT, descricao TEXT, autor TEXT, imagem TEXT);
+                ''')
+        cur.execute('''
+                                    CREATE TABLE IF NOT EXISTS wargames(titulo TEXT, descricao TEXT, autor TEXT, imagem TEXT);
+                        ''')
+        cur.execute('''
+                                    CREATE TABLE IF NOT EXISTS fichas(tipo TEXT, titulo TEXT, jogador TEXT, nomepersonagem TEXT, personalidade TEXT, idade TEXT, habilidades TEXT, aparencia TEXT, historia TEXT, imagem TEXT);
+                        ''')
 
     def tokenload(self):
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):
@@ -112,6 +130,8 @@ client = aclient()
 tree = app_commands.CommandTree(client)
 version_info = MainExecution().setversioninfo()
 user_info = MainExecution().setuserinfo()
+
+
 @tree.command(name="version",
               description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
               guild=discord.Object(id=696830110493573190))
@@ -292,6 +312,72 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
         await interaction.response.send_message(embed=embedVar)
 
 
+@app_commands.choices(tipo=[
+    Choice(name='roleplay', value='roleplay'),
+    Choice(name='wargame', value='wargame'),
+])
+@tree.command(name="lista", description="Verificar os RPs em progresso.", guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, tipo: str):
+    if tipo == 'roleplay':
+        embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
+        i = 1
+        for rp in listaderps:
+            rp = str.title(rp)
+            embed_configuration.add_field(name=f"{i}.", value=f" {rp}")
+            i += 1
+        await interaction.response.send_message(embed=embed_configuration)
+
+
+@app_commands.choices(comando=[
+    Choice(name='info', value='info'),
+    Choice(name='ficha', value='ficha'),
+    Choice(name='listarp', value='listarp')
+])
+@tree.command(name="rpwargame",
+              description="Verificar as informações de um RP ou Wargame.",
+              guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, tipo: str, nome: str, comando: str):
+    default_embed = MainExecution().defaultembed
+    nome = str.lower(nome)
+    if comando == 'ficha':
+        pass
+    elif comando == 'info':
+        info = cur.execute(f'''
+            SELECT titulo, descricao, autor, imagem FROM rps
+            WHERE titulo = ? 
+        
+        
+        ''', (nome,)).fetchone()
+        embed_configuration = discord.Embed(title=f"{str.title(info[0])}", description=f"{info[1]}", color=0x2ecc71)
+        embed_configuration.add_field(name="Autor:", value=f"<@{info[2]}>")
+        await interaction.response.send_message(embed=embed_configuration)
+        await interaction.channel.send(f"{info[3]}")
+
+
+
+
+@tree.command(name="criarrp",
+              description="Criar um Wargame ou Roleplay (rp).",
+              guild=discord.Object(id=696830110493573190))
+async def self(interaction: discord.Interaction, tipo: str, nome: str, descricao: str, imagem: str):
+    default_embed = MainExecution().defaultembed
+    autor = str(interaction.user.id)
+    nome = str.lower(nome)
+    if tipo == 'rp':
+        try:
+            cur.execute('''
+                        INSERT INTO rps (titulo, descricao, autor, imagem) VALUES (?, ?, ?, ?)
+
+
+            ''', (nome, descricao, autor, imagem))
+            conn.commit()
+            embedVar = default_embed(f"Sucesso.", f"RP {nome} adicionado.")
+            await interaction.response.send_message(embed=embedVar)
+        except Exception as e:
+            print(e)
+
+    elif nome == 'wargame':
+        pass
 
 if __name__ == '__main__':
     MainExecution()
