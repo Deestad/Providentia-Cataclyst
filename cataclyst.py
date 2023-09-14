@@ -25,7 +25,6 @@ listaderps = cur.execute(f'''
         ''').fetchone()
 
 
-
 class MainExecution:
 
     def __init__(self):
@@ -63,7 +62,7 @@ class MainExecution:
                                     CREATE TABLE IF NOT EXISTS wargames(titulo TEXT, descricao TEXT, autor TEXT, imagem TEXT);
                         ''')
         cur.execute('''
-                                    CREATE TABLE IF NOT EXISTS fichas(tipo TEXT, titulo TEXT, jogador TEXT, nomepersonagem TEXT, personalidade TEXT, idade TEXT, habilidades TEXT, aparencia TEXT, historia TEXT, imagem TEXT);
+                                    CREATE TABLE IF NOT EXISTS fichaRP(titulorp TEXT, jogador TEXT, nomepersonagem TEXT, personalidade TEXT, idade TEXT, habilidades TEXT, aparencia TEXT, historia TEXT, imagem TEXT, genero TEXT);
                         ''')
 
     def tokenload(self):
@@ -116,7 +115,7 @@ class aclient(discord.Client):
     async def on_ready(self):
         await self.wait_until_ready()
         if not self.synced:
-            await tree.sync(guild=discord.Object(id=696830110493573190))
+            await tree.sync()
         await self.change_presence(status=discord.Status.dnd, activity=(
             discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
 
@@ -134,7 +133,7 @@ user_info = MainExecution().setuserinfo()
 
 @tree.command(name="version",
               description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
-              guild=discord.Object(id=696830110493573190))
+               )
 async def self(interaction: discord.Interaction):
     default_embed = MainExecution().defaultembed
     message = (
@@ -144,7 +143,7 @@ async def self(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embedVar)
 
 
-@tree.command(name="explain", description="O que quer saber?", guild=discord.Object(id=696830110493573190))
+@tree.command(name="explain", description="O que quer saber?" )
 async def self(interaction: discord.Interaction, searchquery: str):
     default_embed = MainExecution().defaultembed
     embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", "...")
@@ -179,7 +178,7 @@ async def self(interaction: discord.Interaction, searchquery: str):
 
 @tree.command(name="arithmetic",
               description="Resolução de problemas simples de matemática básica.",
-              guild=discord.Object(id=696830110493573190))
+               )
 async def self(interaction: discord.Interaction, expression: str):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
@@ -200,7 +199,7 @@ async def self(interaction: discord.Interaction, expression: str):
 
 @tree.command(name="equation",
               description="Resolução de equações de primeiro grau de uma variável 'x'.",
-              guild=discord.Object(id=696830110493573190))
+               )
 async def self(interaction: discord.Interaction, leftside: str, equals: int):
     try:
         x = Symbol('x')
@@ -226,7 +225,7 @@ async def self(interaction: discord.Interaction, leftside: str, equals: int):
 
 
 @tree.command(name="average",
-              description="Calculo de médias. Separe por vírgulas.", guild=discord.Object(id=696830110493573190))
+              description="Calculo de médias. Separe por vírgulas." )
 async def self(interaction: discord.Interaction, items: str):
     try:
         lista_formatada = items
@@ -251,7 +250,7 @@ async def self(interaction: discord.Interaction, items: str):
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
-              guild=discord.Object(id=696830110493573190))
+               )
 async def self(interaction: discord.Interaction, id: str, add_remove: str):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
@@ -316,9 +315,84 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
     Choice(name='roleplay', value='roleplay'),
     Choice(name='wargame', value='wargame'),
 ])
-@tree.command(name="lista", description="Verificar os RPs em progresso.", guild=discord.Object(id=696830110493573190))
+@tree.command(name="lista", description="Verificar os RPs em progresso." )
 async def self(interaction: discord.Interaction, tipo: str):
     if tipo == 'roleplay':
+        embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
+        i = 1
+        for rp in listaderps:
+            rp = str.title(rp)
+            embed_configuration.add_field(name=f"{i}.", value=f" {rp}")
+            i += 1
+        await interaction.response.send_message(embed=embed_configuration)
+
+@app_commands.choices(tipo=[
+    Choice(name='roleplay', value='roleplay'),
+    Choice(name='wargame', value='wargame')
+])
+@tree.command(name="adicionarficha", description="Adicionar ficha ao sistema.",
+               )
+async def self(interaction: discord.Interaction, tipo: str, nome_rp: str, nome_personagem: str, genero: str, personalidade: str, idade: str, habilidades: str, aparencia: str, historia: str, imagem: str):
+    tipo = str.lower(tipo)
+    nome_rp = str.lower(nome_rp)
+    nome_personagem = str.lower(nome_personagem)
+    jogador = interaction.user.id
+
+    if tipo == 'roleplay':
+        rpcheck = cur.execute(f'''
+            SELECT titulo FROM rps WHERE titulo = ?
+        
+        
+        ''', (nome_rp,)).fetchone()
+        print(rpcheck)
+        if rpcheck:
+
+            cur.execute('''INSERT into fichaRP (titulorp, jogador, nomepersonagem, personalidade, idade, habilidades, 
+            aparencia, historia, imagem, genero) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    
+    
+            ''', (nome_rp, jogador, nome_personagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero))
+            default_embed = MainExecution().defaultembed
+            conn.commit()
+            embedVar = default_embed("Sucesso.", f"Ficha adicionada.")
+            await interaction.response.send_message(embed=embedVar)
+        else:
+            default_embed = MainExecution().defaultembed
+            embedVar = default_embed("Erro",f"Roleplay não existe.")
+            await interaction.response.send_message(embed=embedVar)
+
+    elif tipo == 'wargame':
+        embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
+        i = 1
+        for rp in listaderps:
+            rp = str.title(rp)
+            embed_configuration.add_field(name=f"{i}.", value=f" {rp}")
+            i += 1
+        await interaction.response.send_message(embed=embed_configuration)
+
+@app_commands.choices(tipo=[
+    Choice(name='roleplay', value='roleplay'),
+    Choice(name='wargame', value='wargame')
+])
+@tree.command(name="fichainfo", description="Verificar ficha de um usuário." )
+async def self(interaction: discord.Interaction, tipo: str, nome_rp: str, personagem: str):
+    personagem = str.lower(personagem)
+    nome_rp = str.lower(nome_rp)
+    tipo = str.lower(tipo)
+    if tipo == 'roleplay':
+        ficha = cur.execute('''
+            SELECT titulorp, jogador, nomepersonagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero
+            FROM fichaRP
+            WHERE nomepersonagem = ? AND titulorp = ?
+        
+        ''', (personagem, nome_rp)).fetchone()
+        print(ficha)
+        embed_configuration = discord.Embed(title=f"{str.upper(ficha[0])} | {str.capitalize(ficha[2])}", description=f"Idade: {ficha[4]} \n\n **História:** {ficha[7]} \n\n **Personalidade:** {ficha[3]} \n\n **Habi"
+                                                                                          f"lidades:** {ficha[5]}\n\n **Aparência:** {ficha[6]}", color=0x2ecc71)
+        embed_configuration.add_field(name="Jogador:", value=f"<@{ficha[1]}>")
+        await interaction.response.send_message(embed=embed_configuration)
+        await interaction.channel.send(f"{ficha[8]}")
+    elif tipo == 'wargame':
         embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
         i = 1
         for rp in listaderps:
@@ -330,18 +404,14 @@ async def self(interaction: discord.Interaction, tipo: str):
 
 @app_commands.choices(comando=[
     Choice(name='info', value='info'),
-    Choice(name='ficha', value='ficha'),
     Choice(name='listarp', value='listarp')
 ])
 @tree.command(name="rpwargame",
-              description="Verificar as informações de um RP ou Wargame.",
-              guild=discord.Object(id=696830110493573190))
+              description="Verificar as informações de um RP ou Wargame.")
 async def self(interaction: discord.Interaction, tipo: str, nome: str, comando: str):
     default_embed = MainExecution().defaultembed
     nome = str.lower(nome)
-    if comando == 'ficha':
-        pass
-    elif comando == 'info':
+    if comando == 'info':
         info = cur.execute(f'''
             SELECT titulo, descricao, autor, imagem FROM rps
             WHERE titulo = ? 
@@ -354,11 +424,8 @@ async def self(interaction: discord.Interaction, tipo: str, nome: str, comando: 
         await interaction.channel.send(f"{info[3]}")
 
 
-
-
 @tree.command(name="criarrp",
-              description="Criar um Wargame ou Roleplay (rp).",
-              guild=discord.Object(id=696830110493573190))
+              description="Criar um Wargame ou Roleplay (rp).")
 async def self(interaction: discord.Interaction, tipo: str, nome: str, descricao: str, imagem: str):
     default_embed = MainExecution().defaultembed
     autor = str(interaction.user.id)
@@ -378,6 +445,7 @@ async def self(interaction: discord.Interaction, tipo: str, nome: str, descricao
 
     elif nome == 'wargame':
         pass
+
 
 if __name__ == '__main__':
     MainExecution()

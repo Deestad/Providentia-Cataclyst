@@ -103,7 +103,7 @@ async def self(interaction: discord.Interaction):
         embedVar = defaultembed(f"Providentia Type D {version}", message)
         await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name="explicar",description="O que quer saber?",guild=discord.Object(id=696830110493573190))
+@tree.command(name="explicar",description="O que quer saber?" ))
 async def self(interaction: discord.Interaction, searchquery: str):
     embedVar = defaultembed(f"Você quer aprender sobre {searchquery}?","...")
     await interaction.response.send_message(embed=embedVar)
@@ -129,7 +129,7 @@ async def self(interaction: discord.Interaction, searchquery: str):
                 message = ("Desculpe, não pude encontrar o que você está procurando.")
                 embedVar = defaultembed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
-@tree.command(name="mododedefesa",description="Ativação do modo de defesa contra invasão.",guild=discord.Object(id=696830110493573190))
+@tree.command(name="mododedefesa",description="Ativação do modo de defesa contra invasão." ))
 async def self(interaction: discord.Interaction):
     if interaction.permissions.administrator:
         global defensemode
@@ -145,7 +145,7 @@ async def self(interaction: discord.Interaction):
             await interaction.channel.edit(slowmode_delay=0)
             defensemode = False
 
-@tree.command(name="conversar",description="Como posso ajudar?",guild=discord.Object(id=696830110493573190))
+@tree.command(name="conversar",description="Como posso ajudar?" ))
 async def self(interaction: discord.Interaction, mensagem: str):
     blacklist = open('MilitaryData/userinfo.json')
     blacklist = json.load(blacklist)
@@ -157,7 +157,7 @@ async def self(interaction: discord.Interaction, mensagem: str):
         embedVar = defaultembed("Você não tem permissão para usar este comando.", "Desculpe, somemente respondo à Lys.")
         await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name="ensinar",description="Quer me ensinar uma palavra?",guild=discord.Object(id=696830110493573190))
+@tree.command(name="ensinar",description="Quer me ensinar uma palavra?" ))
 async def self(interaction: discord.Interaction, palavra: str, tipo: str):
     blacklist = open('MilitaryData/userinfo.json')
     blacklist = json.load(blacklist)
