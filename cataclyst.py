@@ -1,4 +1,5 @@
 import ast
+import datetime
 import typing
 
 from comandos import rp, matematica
@@ -423,6 +424,17 @@ async def self(interaction: discord.Interaction, nome: str, descricao: str, imag
     except Exception as e:
         print(e)
 
+@tree.command(name="interpretarnpc",
+              description="Criar um Roleplay (rp).")
+async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str], dialogo: str,):
+    embed_configuration = discord.Embed(title=f"", color=15277667, description=f"{dialogo}", timestamp=datetime.datetime.now())
+    if titulo:
+        embed_configuration.set_author(name=f"{nomenpc}, {titulo} diz:", icon_url="https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
+    else:
+        embed_configuration.set_author(name=f"{nomenpc} diz:", icon_url="https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
+    await interaction.response.send_message(embed=embed_configuration)
+
+
 @tree.command(name="rpremover",
               description="Remover um RP.")
 async def self(interaction: discord.Interaction, titulo: str):
@@ -431,15 +443,15 @@ async def self(interaction: discord.Interaction, titulo: str):
     titulo = str.lower(titulo)
     try:
         cur.execute('''
-        DELETE * FROM rps 
+        DELETE FROM rps 
         WHERE titulo = ? AND autor = ?
         ''', (titulo, jogador))
         cur.execute('''
-        DELETE * from ficharp
+        DELETE FROM ficharp
         WHERE titulorp = ?
         
         
-        ''', titulo)
+        ''', (titulo,))
         conn.commit()
         embedVar = default_embed(f"Sucesso.", f"RP {titulo} removido.")
         await interaction.response.send_message(embed=embedVar)
