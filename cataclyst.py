@@ -539,20 +539,26 @@ async def self(interaction: discord.Interaction, titulo: str):
 
 
 @tree.command(name="acaowargame",
-              description="Faça uma ação estetizada em um Wargame..")
+              description="Faça uma ação estetizada em um Wargame.")
 async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, descricao: str,
                imagem: typing.Optional[str]):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     if whitelisted:
         embed_configuration = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}",
                                             timestamp=datetime.datetime.now())
-        embed_configuration.set_footexr(text=f"Ação {numeroacao} de 3",
+        embed_configuration.set_footer(text=f"Ação {numeroacao} de 3",
                                         icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
+
+        delete_button = discord.ui.Button(label='Deletar ação', style=discord.ButtonStyle.danger)
+        view = discord.ui.View()
+
+        async def deletebuttonCallback(interaction: discord.Interaction):
+            await interaction.delete_original_response()
+        view.add_item(delete_button)
+        delete_button.callback = deletebuttonCallback
         if imagem:
             embed_configuration.set_image(url=imagem)
-        channel = client.get_channel(1151235436753203311)
-        await channel.send(embed=embed_configuration)
-        interaction.response.send("Ação feita com sucesso.")
+        await interaction.response.send_message(embed=embed_configuration, view=view)
     else:
         await interaction.response.send("Este comando é dedicado apenas à Aldynor e seus aliados.")
 
