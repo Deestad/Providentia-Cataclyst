@@ -141,7 +141,7 @@ class aclient(discord.Client):
         #SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
-        elif channel == "ações":
+        elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
             author = message.author.name
             authorimage = message.author.avatar
             security_base = client.get_channel(1165782255168409720)
@@ -151,6 +151,17 @@ class aclient(discord.Client):
             embed_configuration.set_thumbnail(url=authorimage)
 
             await security_base.send(embed=embed_configuration)
+        elif channel == "ficha":
+            author = message.author.name
+            authorimage = message.author.avatar
+            security_base = client.get_channel(1165782255168409720)
+            embed_configuration = discord.Embed(title=f"Ficha inimiga detectada:",
+                                                color=discord.Color.random(),
+                                                description=f"")
+            embed_configuration.set_image(url=message.attachments[0].url)
+
+            await security_base.send(embed=embed_configuration)
+
 
 
 
