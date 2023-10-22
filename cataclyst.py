@@ -91,12 +91,14 @@ class MainExecution:
         user_info = open("MilitaryData/userinfo.json")
         user_info = json.load(user_info)
         return user_info
-
+    def callIntents(self):
+        self.intents = discord.Intents.default()
+        self.intents.message_content = True
+        intents = self.intents
+        return intents
     def setversioninfo(self):
         version_info = open('versioninfo.json', encoding='utf-8')
         self.version_info = json.load(version_info)
-
-        self.intents = discord.Intents.default()
         self.version = self.version_info["version"]
         self.version_title = self.version_info["versiontitle"]
 
@@ -121,8 +123,10 @@ for sub_list in censura:
     flat_list += sub_list
 
 class aclient(discord.Client):
+
     def __init__(self):
-        super().__init__(intents=discord.Intents.default())
+        intents = MainExecution().callIntents()
+        super().__init__(intents=intents)
         self.synced = False
 
     async def on_ready(self):
@@ -133,7 +137,19 @@ class aclient(discord.Client):
             discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
 
     async def on_message(self, message):
-        pass
+        channel = message.channel.name
+        #SPYBOT FUNCTIONALITY
+        if message.author.id == client.user.id:
+            pass
+        elif channel == "ações":
+            author = message.author.name
+            security_base = client.get_channel(1165782255168409720)
+            embed_configuration = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
+                                                color=discord.Color.random(),
+                                                description=f"{message.content}")
+
+            await security_base.send(embed=embed_configuration)
+
 
 
 # EVENTS
