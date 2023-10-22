@@ -311,6 +311,33 @@ async def self(interaction: discord.Interaction, items: str):
         embedVar = default_embed(f"Valor inválido.", f"Insira uma lista de números separados por vírgulas.")
         await interaction.response.send_message(embed=embedVar)
 
+@tree.command(name="analyze", description="Realizar análise.")
+async def self(interaction: discord.Interaction, searchquery: str, searchsize: int, searchtarget_id: typing.Optional[str]):
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    if whitelisted:
+        current_wargame = client.get_guild(1150898662982041641)
+        security_base = client.get_channel(1165782255168409720)
+        for channel in current_wargame.channels:
+            if channel.name == searchquery:
+                last_messages = [message async for message in channel.history(limit=searchsize)]
+                for message in last_messages:
+                    if searchtarget_id:
+                        if str(message.author.id) == searchtarget_id:
+                            embed_configuration = discord.Embed(
+                                title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
+                                color=discord.Color.random(),
+                                description=f"{message.content}")
+                            embed_configuration.set_thumbnail(url=message.author.avatar)
+                            await security_base.send(embed=embed_configuration)
+                    else:
+                        embed_configuration = discord.Embed(title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
+                                                            color=discord.Color.random(),
+                                                            description=f"{message.content}")
+                        embed_configuration.set_thumbnail(url=message.author.avatar)
+
+                        await security_base.send(embed=embed_configuration)
+
+
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
