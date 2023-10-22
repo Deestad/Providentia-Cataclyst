@@ -173,6 +173,9 @@ async def self(interaction: discord.Interaction, searchquery: str):
         embedVar = default_embed(f"Você quer aprender sobre {searchquery}?",
                                  "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
         await interaction.edit_original_response(embed=embedVar)
+    elif str.lower(searchquery) == ("penis") or str.lower(searchquery) == ("vagina"):
+        embedVar = default_embed(f"Opa, que isso?", "Perdões, mas não vou fazer isso, seu engraçadinho.")
+        await interaction.edit_original_response(embed=embedVar)
     else:
         try:
             result = wikipedia.summary(searchquery, sentences=2)
@@ -331,7 +334,9 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
         await interaction.response.send_message(embed=embedVar)
 
 
-
+@tree.command(name="confederate", description="Urra" )
+async def self(interaction: discord.Interaction):
+        await interaction.response.send_message("https://cdn.discordapp.com/attachments/1165444969641812059/1165445020892008498/Dixie.mp4?ex=6546e041&is=65346b41&hm=ef5b2039c0708574d3844d215cc09626e5bb03af38c11750986a6cdf65947730&")
 @tree.command(name="rplistagem", description="Verificar os RPs em progresso." )
 async def self(interaction: discord.Interaction):
         embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
@@ -460,6 +465,20 @@ async def self(interaction: discord.Interaction, titulo: str):
         await interaction.response.send_message(embed=embedVar)
         print(e)
 
+@tree.command(name="acaowargame",
+              description="Faça uma ação estetizada em um Wargame..")
+async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, descricao: str, imagem: typing.Optional[str]):
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    if whitelisted:
+        embed_configuration = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}", timestamp=datetime.datetime.now())
+        embed_configuration.set_footer(text=f"Ação {numeroacao} de 3", icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
+        if imagem:
+            embed_configuration.set_image(url=imagem)
+        channel = client.get_channel(1151235436753203311)
+        await channel.send(embed=embed_configuration)
+        interaction.response.send("Ação feita com sucesso.")
+    else:
+        await interaction.response.send("Este comando é dedicado apenas à Aldynor e seus aliados.")
 
 
 if __name__ == '__main__':
