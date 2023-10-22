@@ -173,7 +173,7 @@ async def self(interaction: discord.Interaction, searchquery: str):
         embedVar = default_embed(f"Você quer aprender sobre {searchquery}?",
                                  "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
         await interaction.edit_original_response(embed=embedVar)
-    elif str.lower(searchquery) == ("penis") or str.lower(searchquery) == ("vagina"):
+    elif str.lower(searchquery) == ("penis") or str.lower(searchquery) == ("vagina") or str.lower(searchquery) == ("fezes") or str.lower(searchquery) == ("pornografia"):
         embedVar = default_embed(f"Opa, que isso?", "Perdões, mas não vou fazer isso, seu engraçadinho.")
         await interaction.edit_original_response(embed=embedVar)
     else:
@@ -430,15 +430,28 @@ async def self(interaction: discord.Interaction, nome: str, descricao: str, imag
         print(e)
 
 @tree.command(name="interpretarnpc",
-              description="Criar um Roleplay (rp).")
-async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str], dialogo: str,):
+              description="Interprete um personagem.")
+async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str], image: typing.Optional[str], dialogo: str,):
     embed_configuration = discord.Embed(title=f"", color=15277667, description=f"{dialogo}", timestamp=datetime.datetime.now())
+    imagem = (f"{image}" if image else "https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
     if titulo:
-        embed_configuration.set_author(name=f"{nomenpc}, {titulo} diz:", icon_url="https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
+        embed_configuration.set_author(name=f"{nomenpc}, {titulo} diz:", icon_url=imagem)
     else:
-        embed_configuration.set_author(name=f"{nomenpc} diz:", icon_url="https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
+        embed_configuration.set_author(name=f"{nomenpc} diz:", icon_url=imagem)
     await interaction.response.send_message(embed=embed_configuration)
 
+@tree.command(name="citacao",
+              description="Citação da última mensagem enviada.")
+async def self(interaction: discord.Interaction):
+    message = [message async for message in interaction.channel.history(limit=3)]
+    dialogo = message[0].content
+    usuario = message[0].author.id
+    usuarionome = message[0].author.name
+    imagem = message[0].author.avatar
+    embed_configuration = discord.Embed(title=f'''"{dialogo}"''', color=10070709, description=f"")
+    embed_configuration.set_image(url=imagem)
+    embed_configuration.add_field(name="", value=f"<@{usuario}>, {datetime.datetime.today().year}")
+    await interaction.response.send_message(embed=embed_configuration)
 
 @tree.command(name="rpremover",
               description="Remover um RP.")
