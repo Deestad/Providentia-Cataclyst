@@ -143,10 +143,12 @@ class aclient(discord.Client):
             pass
         elif channel == "ações":
             author = message.author.name
+            authorimage = message.author.avatar
             security_base = client.get_channel(1165782255168409720)
             embed_configuration = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
                                                 color=discord.Color.random(),
                                                 description=f"{message.content}")
+            embed_configuration.set_thumbnail(url=authorimage)
 
             await security_base.send(embed=embed_configuration)
 
