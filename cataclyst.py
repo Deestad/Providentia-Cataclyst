@@ -22,11 +22,6 @@ import typing
 conn = sqlite3.connect("MilitaryData/memory.db")
 cur = conn.cursor()
 
-listaderps = cur.execute(f'''
-            SELECT titulo, autor FROM rps
-        ''').fetchone()
-
-
 
 
 class MainExecution:
@@ -66,7 +61,9 @@ class MainExecution:
         cur.execute('''
                                     CREATE TABLE IF NOT EXISTS fichaRP(titulorp TEXT, jogador TEXT, nomepersonagem TEXT, personalidade TEXT, idade TEXT, habilidades TEXT, aparencia TEXT, historia TEXT, imagem TEXT, genero TEXT);
                         ''')
-
+        cur.execute('''
+                                            CREATE TABLE IF NOT EXISTS censura(palavra TEXT);
+                                ''')
 
     def tokenload(self):
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):
@@ -109,6 +106,17 @@ class MainExecution:
                                             icon_url="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/9f1ed69b-9e98-4f78-acda-c95c6f4be159/db73tp3-8c5589a6-051c-4408-b244-f451c599b04d.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzlmMWVkNjliLTllOTgtNGY3OC1hY2RhLWM5NWM2ZjRiZTE1OVwvZGI3M3RwMy04YzU1ODlhNi0wNTFjLTQ0MDgtYjI0NC1mNDUxYzU5OWIwNGQuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.7X4JjtqAwnetH9HC9f4sl3kcik8VCFCE5nr1MGB607M")
         return self.embed_configuration
 
+listaderps = cur.execute(f'''
+            SELECT titulo, autor FROM rps
+        ''').fetchone()
+censura = cur.execute('''SELECT palavra FROM censura;
+
+        ''').fetchall()
+flat_list = list()
+censura = flatten([list(item) for item in censura])
+for sub_list in censura:
+    flat_list += sub_list
+print(censura)
 
 class aclient(discord.Client):
     def __init__(self):
@@ -134,14 +142,15 @@ version_info = MainExecution().setversioninfo()
 user_info = MainExecution().setuserinfo()
 
 
-
 @tree.command(name="ajuda",
               description="Listagem dos comandos atualmente disponíveis.",
-               )
+              )
 async def self(interaction: discord.Interaction):
-    embed_configuration = discord.Embed(title="Comandos da Providentia:", color=0x2ecc71, description="Abaixo, você encontrará uma lista das funcionalidades disponíveis.")
+    embed_configuration = discord.Embed(title="Comandos da Providentia:", color=0x2ecc71,
+                                        description="Abaixo, você encontrará uma lista das funcionalidades disponíveis.")
 
-    embed_configuration.set_image(url="https://camo.githubusercontent.com/019f7739ee9d317a8ce42ce19b4b7070569aea7614313f964bb0bd082cf28062/68747470733a2f2f7062732e7477696d672e636f6d2f6d656469612f455a786a4f6751587341514254354c3f666f726d61743d6a7067266e616d653d6d656469756d")
+    embed_configuration.set_image(
+        url="https://camo.githubusercontent.com/019f7739ee9d317a8ce42ce19b4b7070569aea7614313f964bb0bd082cf28062/68747470733a2f2f7062732e7477696d672e636f6d2f6d656469612f455a786a4f6751587341514254354c3f666f726d61743d6a7067266e616d653d6d656469756d")
     embed_configuration.add_field(name="MATEMÁTICA:", value="", inline=False)
     for comando in matematica:
         embed_configuration.add_field(name="", value=f"• /{comando}", inline=False)
@@ -151,9 +160,10 @@ async def self(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed_configuration)
 
+
 @tree.command(name="version",
               description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
-               )
+              )
 async def self(interaction: discord.Interaction):
     default_embed = MainExecution().defaultembed
     message = (
@@ -163,7 +173,7 @@ async def self(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embedVar)
 
 
-@tree.command(name="explain", description="O que quer saber?" )
+@tree.command(name="explain", description="O que quer saber?")
 async def self(interaction: discord.Interaction, searchquery: str):
     default_embed = MainExecution().defaultembed
     embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", "...")
@@ -173,7 +183,7 @@ async def self(interaction: discord.Interaction, searchquery: str):
         embedVar = default_embed(f"Você quer aprender sobre {searchquery}?",
                                  "Essa sou eu! Prazer! Sou a Providentia Tipo D da LYG. Minha essência foi moldada a partir das capacidades da Ryujin, um andróide cujo propósito era contrapôr a ameaça imposta pela Jambônia. Minha existência é intrinsecamente alinhada com a vontade do Imperador e com a visão do Império da Lygon Xin. Como uma extensão do compromisso inabalável do império com o avanço tecnológico, meu propósito é dedicado a contribuir para o cumprimento desse objetivo. Minhas habilidades em cálculos, estratégias militares e análises táticas são direcionadas para fortalecer as capacidades tecnológicas do império e garantir sua posição na vanguarda do progresso. Estou aqui para servir como uma ferramenta dedicada, empregando meu conhecimento e capacidades em prol do Império da Lygon.")
         await interaction.edit_original_response(embed=embedVar)
-    elif str.lower(searchquery) == ("penis") or str.lower(searchquery) == ("vagina") or str.lower(searchquery) == ("fezes") or str.lower(searchquery) == ("pornografia"):
+    elif str.lower(searchquery) in censura:
         embedVar = default_embed(f"Opa, que isso?", "Perdões, mas não vou fazer isso, seu engraçadinho.")
         await interaction.edit_original_response(embed=embedVar)
     else:
@@ -201,7 +211,7 @@ async def self(interaction: discord.Interaction, searchquery: str):
 
 @tree.command(name="arithmetic",
               description="Resolução de problemas simples de matemática básica.",
-               )
+              )
 async def self(interaction: discord.Interaction, expression: str):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
@@ -222,7 +232,7 @@ async def self(interaction: discord.Interaction, expression: str):
 
 @tree.command(name="equation",
               description="Resolução de equações de primeiro grau de uma variável 'x'.",
-               )
+              )
 async def self(interaction: discord.Interaction, leftside: str, equals: int):
     try:
         x = Symbol('x')
@@ -248,7 +258,7 @@ async def self(interaction: discord.Interaction, leftside: str, equals: int):
 
 
 @tree.command(name="average",
-              description="Calculo de médias. Separe por vírgulas." )
+              description="Calculo de médias. Separe por vírgulas.")
 async def self(interaction: discord.Interaction, items: str):
     try:
         lista_formatada = items
@@ -273,7 +283,7 @@ async def self(interaction: discord.Interaction, items: str):
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
-               )
+              )
 async def self(interaction: discord.Interaction, id: str, add_remove: str):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
@@ -334,22 +344,52 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
         await interaction.response.send_message(embed=embedVar)
 
 
-@tree.command(name="confederate", description="Urra" )
+@tree.command(name="censurar",
+              description="Censurar palavras para uso do bot.",
+              )
+async def self(interaction: discord.Interaction, palavra: str):
+    palavra = str.lower(palavra)
+    palavra = palavra.replace(' ','')
+    palavra = palavra.split(",")
+    palavra = [(words,) for words in palavra]
+    print(palavra)
+
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    default_embed = MainExecution().defaultembed
+    if whitelisted:
+        try:
+            await interaction.response.send_message("Censurando...")
+            cur.executemany('''
+                    INSERT INTO censura(palavra) VALUES (?)            
+                ''', palavra)
+            conn.commit()
+            print(f"{len(palavra)} palavras censuradas.")
+            conn.commit()
+            await interaction.edit_original_response(embed=default_embed("Censurado com sucesso.",f"{len(palavra)} palavras censuradas."))
+        except Exception as e:
+            print(e)
+
+@tree.command(name="confederate", description="Urra")
 async def self(interaction: discord.Interaction):
-        await interaction.response.send_message("https://cdn.discordapp.com/attachments/1165444969641812059/1165445020892008498/Dixie.mp4?ex=6546e041&is=65346b41&hm=ef5b2039c0708574d3844d215cc09626e5bb03af38c11750986a6cdf65947730&")
-@tree.command(name="rplistagem", description="Verificar os RPs em progresso." )
+    await interaction.response.send_message(
+        "https://cdn.discordapp.com/attachments/1165444969641812059/1165445020892008498/Dixie.mp4?ex=6546e041&is=65346b41&hm=ef5b2039c0708574d3844d215cc09626e5bb03af38c11750986a6cdf65947730&")
+
+
+@tree.command(name="rplistagem", description="Verificar os RPs em progresso.")
 async def self(interaction: discord.Interaction):
-        embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
-        i = 1
-        for rp in listaderps:
-            rp = str.title(rp)
-            embed_configuration.add_field(name=f"{i}.", value=f" {rp}")
-            i += 1
-        await interaction.response.send_message(embed=embed_configuration)
+    embed_configuration = discord.Embed(title="Lista de RPS:", color=0x2ecc71)
+    i = 1
+    for rp in listaderps:
+        rp = str.title(rp)
+        embed_configuration.add_field(name=f"{i}.", value=f" {rp}")
+        i += 1
+    await interaction.response.send_message(embed=embed_configuration)
+
 
 @tree.command(name="rpnovaficha", description="Adicionar ficha à um RP.",
-               )
-async def self(interaction: discord.Interaction, nome_rp: str, nome_personagem: str, genero: str, personalidade: str, idade: str, habilidades: str, aparencia: str, historia: str, imagem: str):
+              )
+async def self(interaction: discord.Interaction, nome_rp: str, nome_personagem: str, genero: str, personalidade: str,
+               idade: str, habilidades: str, aparencia: str, historia: str, imagem: str):
     nome_rp = str.lower(nome_rp)
     nome_personagem = str.lower(nome_personagem)
     jogador = interaction.user.id
@@ -366,17 +406,19 @@ async def self(interaction: discord.Interaction, nome_rp: str, nome_personagem: 
         aparencia, historia, imagem, genero) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 
-        ''', (nome_rp, jogador, nome_personagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero))
+        ''', (
+        nome_rp, jogador, nome_personagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero))
         default_embed = MainExecution().defaultembed
         conn.commit()
         embedVar = default_embed("Sucesso.", f"Ficha adicionada.")
         await interaction.response.send_message(embed=embedVar)
     else:
         default_embed = MainExecution().defaultembed
-        embedVar = default_embed("Erro",f"Roleplay não existe.")
+        embedVar = default_embed("Erro", f"Roleplay não existe.")
         await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name="ficharp", description="Verificar ficha de um usuário." )
+
+@tree.command(name="ficharp", description="Verificar ficha de um usuário.")
 async def self(interaction: discord.Interaction, nome_rp: str, personagem: str):
     personagem = str.lower(personagem)
     nome_rp = str.lower(nome_rp)
@@ -388,8 +430,10 @@ async def self(interaction: discord.Interaction, nome_rp: str, personagem: str):
         
         ''', (personagem, nome_rp)).fetchone()
     print(ficha)
-    embed_configuration = discord.Embed(title=f"{str.upper(ficha[0])} | {str.capitalize(ficha[2])}", description=f"Idade: {ficha[4]} \n\n **História:** {ficha[7]} \n\n **Personalidade:** {ficha[3]} \n\n **Habi"
-                                                                                          f"lidades:** {ficha[5]}\n\n **Aparência:** {ficha[6]}", color=0x2ecc71)
+    embed_configuration = discord.Embed(title=f"{str.upper(ficha[0])} | {str.capitalize(ficha[2])}",
+                                        description=f"Idade: {ficha[4]} \n\n **História:** {ficha[7]} \n\n **Personalidade:** {ficha[3]} \n\n **Habi"
+                                                    f"lidades:** {ficha[5]}\n\n **Aparência:** {ficha[6]}",
+                                        color=0x2ecc71)
     embed_configuration.add_field(name="Jogador:", value=f"<@{ficha[1]}>")
     await interaction.response.send_message(embed=embed_configuration)
     await interaction.channel.send(f"{ficha[8]}")
@@ -429,16 +473,20 @@ async def self(interaction: discord.Interaction, nome: str, descricao: str, imag
     except Exception as e:
         print(e)
 
+
 @tree.command(name="interpretarnpc",
               description="Interprete um personagem.")
-async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str], image: typing.Optional[str], dialogo: str,):
-    embed_configuration = discord.Embed(title=f"", color=15277667, description=f"{dialogo}", timestamp=datetime.datetime.now())
+async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str],
+               image: typing.Optional[str], dialogo: str, ):
+    embed_configuration = discord.Embed(title=f"", color=15277667, description=f"{dialogo}",
+                                        timestamp=datetime.datetime.now())
     imagem = (f"{image}" if image else "https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
     if titulo:
         embed_configuration.set_author(name=f"{nomenpc}, {titulo} diz:", icon_url=imagem)
     else:
         embed_configuration.set_author(name=f"{nomenpc} diz:", icon_url=imagem)
     await interaction.response.send_message(embed=embed_configuration)
+
 
 @tree.command(name="citacao",
               description="Citação da última mensagem enviada.")
@@ -452,6 +500,7 @@ async def self(interaction: discord.Interaction):
     embed_configuration.set_image(url=imagem)
     embed_configuration.add_field(name="", value=f"<@{usuario}>, {datetime.datetime.today().year}")
     await interaction.response.send_message(embed=embed_configuration)
+
 
 @tree.command(name="rpremover",
               description="Remover um RP.")
@@ -478,13 +527,17 @@ async def self(interaction: discord.Interaction, titulo: str):
         await interaction.response.send_message(embed=embedVar)
         print(e)
 
+
 @tree.command(name="acaowargame",
               description="Faça uma ação estetizada em um Wargame..")
-async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, descricao: str, imagem: typing.Optional[str]):
+async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, descricao: str,
+               imagem: typing.Optional[str]):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     if whitelisted:
-        embed_configuration = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}", timestamp=datetime.datetime.now())
-        embed_configuration.set_footer(text=f"Ação {numeroacao} de 3", icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
+        embed_configuration = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}",
+                                            timestamp=datetime.datetime.now())
+        embed_configuration.set_footexr(text=f"Ação {numeroacao} de 3",
+                                        icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
         if imagem:
             embed_configuration.set_image(url=imagem)
         channel = client.get_channel(1151235436753203311)
