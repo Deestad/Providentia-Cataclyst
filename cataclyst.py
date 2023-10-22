@@ -119,7 +119,6 @@ flat_list = list()
 censura = flatten([list(item) for item in censura])
 for sub_list in censura:
     flat_list += sub_list
-print(censura)
 
 class aclient(discord.Client):
     def __init__(self):
@@ -559,8 +558,12 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
     await interaction.response.send_message(embed=embed_configuration, view=view)
 
 if __name__ == '__main__':
+    print(
+    "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     MainExecution()
     token = MainExecution().tokenload()
+    version = MainExecution().setversioninfo()
+    print(f"Providentia {version['version']}: {version['versiontitle']}")
     client.run(token)
 
 conn.close()
