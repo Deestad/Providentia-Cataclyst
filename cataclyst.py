@@ -2,6 +2,8 @@ import ast
 import datetime
 import typing
 
+from requests import get
+
 from comandos import rp, matematica
 import discord
 import sympy
@@ -14,6 +16,7 @@ import random, time
 import wikipedia
 import sqlite3
 import os, io
+import MemePy
 import numpy as np
 from sympy import *
 import statistics
@@ -501,6 +504,13 @@ async def self(interaction: discord.Interaction):
     embed_configuration.add_field(name="", value=f"<@{usuario}>, {datetime.datetime.today().year}")
     await interaction.response.send_message(embed=embed_configuration)
 
+@tree.command(name="meme",
+              description="Meme.")
+async def self(interaction: discord.Interaction):
+    meme = get("https://meme-api.com/gimme").text
+    data = json.loads(meme,)
+    embed_configuration = discord.Embed(title=f"{data['title']}", color = discord.Color.random()).set_image(url=f"{data['url']}")
+    await interaction.response.send_message(embed=embed_configuration)
 
 @tree.command(name="rpremover",
               description="Remover um RP.")
