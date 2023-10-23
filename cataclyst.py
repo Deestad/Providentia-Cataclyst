@@ -23,18 +23,19 @@ import typing
 
 conn = sqlite3.connect("MilitaryData/memory.db")
 cur = conn.cursor()
-
+global teaching_mode
+global teaching_dialogue
 
 
 class MainExecution:
 
     def __init__(self):
+
         self.intents = None
         self.version_title = None
         self.version = None
         self.version_info = None
         self.activity = None
-
         self.setversioninfo()
         self.setuserinfo()
         self.initializedatabase()
@@ -53,6 +54,9 @@ class MainExecution:
         return id_check
 
     def initializedatabase(self):
+        cur.execute('''
+                            CREATE TABLE IF NOT EXISTS frases(entrada TXT, saida1 TXT, saida2 TXT, saida3 TXT);
+                ''')
         cur.execute('''
                     CREATE TABLE IF NOT EXISTS whitelist(userid INT);
         ''')
@@ -90,11 +94,13 @@ class MainExecution:
         user_info = open("MilitaryData/userinfo.json")
         user_info = json.load(user_info)
         return user_info
+
     def callIntents(self):
         self.intents = discord.Intents.default()
         self.intents.message_content = True
         intents = self.intents
         return intents
+
     def setversioninfo(self):
         version_info = open('versioninfo.json', encoding='utf-8')
         self.version_info = json.load(version_info)
@@ -110,6 +116,7 @@ class MainExecution:
                                             icon_url="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/9f1ed69b-9e98-4f78-acda-c95c6f4be159/db73tp3-8c5589a6-051c-4408-b244-f451c599b04d.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzlmMWVkNjliLTllOTgtNGY3OC1hY2RhLWM5NWM2ZjRiZTE1OVwvZGI3M3RwMy04YzU1ODlhNi0wNTFjLTQ0MDgtYjI0NC1mNDUxYzU5OWIwNGQuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.7X4JjtqAwnetH9HC9f4sl3kcik8VCFCE5nr1MGB607M")
         return self.embed_configuration
 
+
 listaderps = cur.execute(f'''
             SELECT titulo, autor FROM rps
         ''').fetchone()
@@ -120,6 +127,7 @@ flat_list = list()
 censura = flatten([list(item) for item in censura])
 for sub_list in censura:
     flat_list += sub_list
+
 
 class aclient(discord.Client):
 
@@ -137,7 +145,7 @@ class aclient(discord.Client):
 
     async def on_message(self, message):
         channel = message.channel.name
-        #SPYBOT FUNCTIONALITY
+        # SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
         elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
@@ -160,8 +168,6 @@ class aclient(discord.Client):
             embed_configuration.set_image(url=message.attachments[0].url)
 
             await security_base.send(embed=embed_configuration)
-
-
 
 
 # EVENTS
@@ -315,9 +321,12 @@ async def self(interaction: discord.Interaction, items: str):
         embedVar = default_embed(f"Valor inválido.", f"Insira uma lista de números separados por vírgulas.")
         await interaction.response.send_message(embed=embedVar)
 
+
 @tree.command(name="analyze", description="Realizar análise.")
-async def self(interaction: discord.Interaction, searchquery: str, searchsize: int, searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str]):
+async def self(interaction: discord.Interaction, searchquery: str, searchsize: int,
+               searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str]):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+
     async def sendMessage():
         embed_configuration = discord.Embed(
             title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
@@ -325,6 +334,7 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
             description=f"{message.content}")
         embed_configuration.set_thumbnail(url=message.author.avatar)
         await security_base.send(embed=embed_configuration)
+
     if whitelisted:
         current_wargame = client.get_guild(1150898662982041641)
         security_base = client.get_channel(1165782255168409720)
@@ -349,7 +359,6 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                                 pass
                         else:
                             await sendMessage()
-
 
 
 @tree.command(name="whitelist",
@@ -420,7 +429,7 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
               )
 async def self(interaction: discord.Interaction, palavra: str):
     palavra = str.lower(palavra)
-    palavra = palavra.replace(' ','')
+    palavra = palavra.replace(' ', '')
     palavra = palavra.split(",")
     palavra = [(words,) for words in palavra]
     print(palavra)
@@ -436,9 +445,11 @@ async def self(interaction: discord.Interaction, palavra: str):
             conn.commit()
             print(f"{len(palavra)} palavras censuradas.")
             conn.commit()
-            await interaction.edit_original_response(embed=default_embed("Censurado com sucesso.",f"{len(palavra)} palavras censuradas."))
+            await interaction.edit_original_response(
+                embed=default_embed("Censurado com sucesso.", f"{len(palavra)} palavras censuradas."))
         except Exception as e:
             print(e)
+
 
 @tree.command(name="confederate", description="Urra")
 async def self(interaction: discord.Interaction):
@@ -478,7 +489,7 @@ async def self(interaction: discord.Interaction, nome_rp: str, nome_personagem: 
 
 
         ''', (
-        nome_rp, jogador, nome_personagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero))
+            nome_rp, jogador, nome_personagem, personalidade, idade, habilidades, aparencia, historia, imagem, genero))
         default_embed = MainExecution().defaultembed
         conn.commit()
         embedVar = default_embed("Sucesso.", f"Ficha adicionada.")
@@ -572,13 +583,16 @@ async def self(interaction: discord.Interaction):
     embed_configuration.add_field(name="", value=f"<@{usuario}>, {datetime.datetime.today().year}")
     await interaction.response.send_message(embed=embed_configuration)
 
+
 @tree.command(name="meme",
               description="Meme.")
 async def self(interaction: discord.Interaction):
     meme = get("https://meme-api.com/gimme").text
-    data = json.loads(meme,)
-    embed_configuration = discord.Embed(title=f"{data['title']}", color = discord.Color.random()).set_image(url=f"{data['url']}")
+    data = json.loads(meme, )
+    embed_configuration = discord.Embed(title=f"{data['title']}", color=discord.Color.random()).set_image(
+        url=f"{data['url']}")
     await interaction.response.send_message(embed=embed_configuration)
+
 
 @tree.command(name="rpremover",
               description="Remover um RP.")
@@ -613,22 +627,76 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
     embed_configuration = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}",
                                         timestamp=datetime.datetime.now())
     embed_configuration.set_footer(text=f"Ação {numeroacao} de 3",
-                                    icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
+                                   icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
 
     delete_button = discord.ui.Button(label='Deletar ação', style=discord.ButtonStyle.danger)
     view = discord.ui.View()
 
     async def deletebuttonCallback(interaction: discord.Interaction):
         await interaction.delete_original_response()
+
     view.add_item(delete_button)
     delete_button.callback = deletebuttonCallback
     if imagem:
         embed_configuration.set_image(url=imagem)
     await interaction.response.send_message(embed=embed_configuration, view=view)
 
+
+@tree.command(name="talk", description="Converse com a Providentia.")
+async def self(interaction: discord.Interaction, dialogue: str):
+    dialogue = str.lower(dialogue)
+    global teaching_mode
+    global teaching_dialogue
+    async def sendMessage(title, description):
+        embed_configuration = discord.Embed(title=f"{title}", color=15277667,
+                                            description=f"{description}",
+                                            )
+        await interaction.response.send_message(embed=embed_configuration)
+    try:
+        saidas = cur.execute(f'''
+                SELECT saida1,saida2,saida3 FROM frases WHERE entrada = ?
+            ''', (dialogue,)).fetchone()
+        print(saidas)
+        if saidas:
+            await sendMessage("Providentia responde:", f"{random.choice(saidas)}")
+        else:
+            teaching_mode = True
+            teaching_dialogue = interaction.message
+            await sendMessage("Não conheço essa frase.",
+                              "Inicializando modo de ensinamento. Use /talkteach para me ensinar como responder à "
+                              "essa frase.")
+    except Exception as e:
+        print(e)
+
+
+@tree.command(name="talkteach", description="Como providentia deve responder? Dê três opções.")
+async def self(interaction: discord.Interaction, resposta1: str, resposta2: str, resposta3: str):
+    respostas = [str.capitalize(str.lower(resposta1)), str.capitalize(str.lower(resposta2)), str.capitalize(str.lower(resposta3))]
+    global teaching_mode
+    global teaching_dialogue
+    async def sendMessage(title, description):
+        embed_configuration = discord.Embed(title=f"{title}", color=15277667,
+                                            description=f"{description}",
+                                            )
+        await interaction.response.send_message(embed=embed_configuration)
+
+    if teaching_mode:
+        try:
+            cur.execute('''
+                INSERT INTO frases(entrada,saida1,saida2,saida3) values (?,?,?,?)
+            ''', (teaching_dialogue,respostas[0],respostas[1],respostas[2]))
+            conn.commit()
+            teaching_mode = False
+            await sendMessage("Frases adicionadas.","Saídas ensinadas.")
+        except Exception as e:
+            await sendMessage("Erro.", f"Erro ocorreu durante a adição da frase. \n {e}.")
+    else:
+        await sendMessage("Comando indisponível.", f"Este comando pode apenas ser utilizado quando Providentia não "
+                                                   f"entende uma frase através do /talk.")
+
 if __name__ == '__main__':
     print(
-    "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
+        "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     MainExecution()
     token = MainExecution().tokenload()
     version = MainExecution().setversioninfo()
