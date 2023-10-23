@@ -4,7 +4,7 @@ import typing
 
 from requests import get
 
-from comandos import rp, matematica
+from comandos import *
 import discord
 import sympy
 from discord.app_commands import Choice
@@ -16,7 +16,6 @@ import random, time
 import wikipedia
 import sqlite3
 import os, io
-import MemePy
 import numpy as np
 from sympy import *
 import statistics
@@ -185,8 +184,13 @@ async def self(interaction: discord.Interaction):
     embed_configuration.add_field(name="MATEMÁTICA:", value="", inline=False)
     for comando in matematica:
         embed_configuration.add_field(name="", value=f"• /{comando}", inline=False)
-    embed_configuration.add_field(name="RPs:", value="")
+    embed_configuration.add_field(name="ROLEPLAY:", value="", inline=False)
+
     for comando in rp:
+        embed_configuration.add_field(name="", value=f"• /{comando}", inline=False)
+    embed_configuration.add_field(name="ENTRETENIMENTO:", value="", inline=False)
+
+    for comando in fun:
         embed_configuration.add_field(name="", value=f"• /{comando}", inline=False)
 
     await interaction.response.send_message(embed=embed_configuration)
