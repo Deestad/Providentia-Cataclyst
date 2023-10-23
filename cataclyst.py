@@ -312,8 +312,15 @@ async def self(interaction: discord.Interaction, items: str):
         await interaction.response.send_message(embed=embedVar)
 
 @tree.command(name="analyze", description="Realizar análise.")
-async def self(interaction: discord.Interaction, searchquery: str, searchsize: int, searchtarget_id: typing.Optional[str]):
+async def self(interaction: discord.Interaction, searchquery: str, searchsize: int, searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str]):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    async def sendMessage():
+        embed_configuration = discord.Embed(
+            title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
+            color=discord.Color.random(),
+            description=f"{message.content}")
+        embed_configuration.set_thumbnail(url=message.author.avatar)
+        await security_base.send(embed=embed_configuration)
     if whitelisted:
         current_wargame = client.get_guild(1150898662982041641)
         security_base = client.get_channel(1165782255168409720)
@@ -323,19 +330,21 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                 for message in last_messages:
                     if searchtarget_id:
                         if str(message.author.id) == searchtarget_id:
-                            embed_configuration = discord.Embed(
-                                title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
-                                color=discord.Color.random(),
-                                description=f"{message.content}")
-                            embed_configuration.set_thumbnail(url=message.author.avatar)
-                            await security_base.send(embed=embed_configuration)
+                            if must_contain:
+                                if message.content.__contains__(must_contain):
+                                    await sendMessage()
+                                else:
+                                    pass
+                            else:
+                                await sendMessage()
                     else:
-                        embed_configuration = discord.Embed(title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
-                                                            color=discord.Color.random(),
-                                                            description=f"{message.content}")
-                        embed_configuration.set_thumbnail(url=message.author.avatar)
-
-                        await security_base.send(embed=embed_configuration)
+                        if must_contain:
+                            if message.content.__contains__(must_contain):
+                                await sendMessage()
+                            else:
+                                pass
+                        else:
+                            await sendMessage()
 
 
 
