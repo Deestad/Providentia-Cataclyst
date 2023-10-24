@@ -656,7 +656,6 @@ async def self(interaction: discord.Interaction, dialogue: str):
                                             )
         await interaction.response.send_message(embed=embed_configuration)
     try:
-        # Build the SQL query with dynamic placeholders
         query = '''
             SELECT saida1, saida2, saida3 
             FROM frases 
@@ -664,10 +663,30 @@ async def self(interaction: discord.Interaction, dialogue: str):
         '''.format(' OR '.join(['entrada LIKE ?' for _ in placeholders]))
 
         # Execute the query with the placeholders
-        saidas = cur.execute(query, placeholders).fetchone()
-        print(saidas)
-        if saidas:
-            await sendMessage(f"{interaction.user.name} **fala {dialogue}:** \n Providentia responde:", f"{random.choice(saidas)}")
+        results = cur.execute(query, placeholders).fetchall()
+
+        # Initialize a list to store the randomly chosen phrases
+        chosen_phrases = []
+
+        # List of connectors
+        connectors = ['mas', 'e', 'ou', 'além disso', 'no entanto', 'por outro lado', 'portanto', 'em conclusão',
+                      'por isso', 'também', 'assim']
+
+        # Randomly choose a phrase from each result and add it to the list
+        for result in results:
+            chosen_phrases.append(random.choice(result))
+
+        # Combine the chosen phrases with random connectors into a single string
+        combined_phrases = ''
+        for i, phrase in enumerate(chosen_phrases):
+            if i > 0:
+                combined_phrases += f' {random.choice(connectors)} '
+            combined_phrases += phrase
+
+        print(combined_phrases)
+        if combined_phrases:
+            await sendMessage(f"{interaction.user.name} **fala {dialogue}:** \n Providentia responde:",
+                              f"{str.capitalize(str.lower(combined_phrases))}")
         else:
             teaching_mode = True
             teaching_dialogue = dialogue
