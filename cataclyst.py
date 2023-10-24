@@ -645,6 +645,9 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str):
     dialogue = str.lower(dialogue)
+    dialogue_separated = dialogue.split(' ')
+    placeholders = ['%' + word + '%' for word in dialogue_separated]
+
     global teaching_mode
     global teaching_dialogue
     async def sendMessage(title, description):
@@ -653,12 +656,15 @@ async def self(interaction: discord.Interaction, dialogue: str):
                                             )
         await interaction.response.send_message(embed=embed_configuration)
     try:
-        saidas = cur.execute('''
+        # Build the SQL query with dynamic placeholders
+        query = '''
             SELECT saida1, saida2, saida3 
             FROM frases 
-            WHERE entrada LIKE ? OR entrada LIKE ? OR entrada LIKE ?
-        ''', ('%' + dialogue + '%', '%' + dialogue, dialogue + '%')).fetchone()
+            WHERE {}
+        '''.format(' OR '.join(['entrada LIKE ?' for _ in placeholders]))
 
+        # Execute the query with the placeholders
+        saidas = cur.execute(query, placeholders).fetchone()
         print(saidas)
         if saidas:
             await sendMessage(f"{interaction.user.name} **fala {dialogue}:** \n Providentia responde:", f"{random.choice(saidas)}")
