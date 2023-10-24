@@ -653,12 +653,15 @@ async def self(interaction: discord.Interaction, dialogue: str):
                                             )
         await interaction.response.send_message(embed=embed_configuration)
     try:
-        saidas = cur.execute(f'''
-                SELECT saida1,saida2,saida3 FROM frases WHERE entrada = ?
-            ''', (dialogue,)).fetchone()
+        saidas = cur.execute('''
+            SELECT saida1, saida2, saida3 
+            FROM frases 
+            WHERE entrada LIKE ? OR entrada LIKE ? OR entrada LIKE ?
+        ''', ('%' + dialogue + '%', '%' + dialogue, dialogue + '%')).fetchone()
+
         print(saidas)
         if saidas:
-            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:", f"{random.choice(saidas)}")
+            await sendMessage(f"{interaction.user.name} **fala {dialogue}:** \n Providentia responde:", f"{random.choice(saidas)}")
         else:
             teaching_mode = True
             teaching_dialogue = dialogue
