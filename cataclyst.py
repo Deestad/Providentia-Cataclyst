@@ -645,9 +645,6 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str):
     dialogue = str.lower(dialogue)
-    dialogue_separated = dialogue.split(' ')
-    placeholders = ['%' + word + '%' for word in dialogue_separated]
-
     global teaching_mode
     global teaching_dialogue
     async def sendMessage(title, description):
@@ -656,40 +653,16 @@ async def self(interaction: discord.Interaction, dialogue: str):
                                             )
         await interaction.response.send_message(embed=embed_configuration)
     try:
-        query = '''
-            SELECT saida1, saida2, saida3 
-            FROM frases 
-            WHERE {}
-        '''.format(' OR '.join(['entrada LIKE ?' for _ in placeholders]))
-
-        # Execute the query with the placeholders
-        results = cur.execute(query, placeholders).fetchall()
-
-        # Initialize a list to store the randomly chosen phrases
-        chosen_phrases = []
-
-        # List of connectors
-        connectors = ['mas', 'e', 'ou', 'além disso', 'no entanto', 'por outro lado', 'portanto', 'em conclusão',
-                      'por isso', 'também', 'assim']
-
-        # Randomly choose a phrase from each result and add it to the list
-        for result in results:
-            chosen_phrases.append(random.choice(result))
-
-        # Combine the chosen phrases with random connectors into a single string
-        combined_phrases = ''
-        for i, phrase in enumerate(chosen_phrases):
-            if i > 0:
-                combined_phrases += f' {random.choice(connectors)} '
-            combined_phrases += phrase
-
-        print(combined_phrases)
-        if combined_phrases:
-            await sendMessage(f"{interaction.user.name} **fala {dialogue}:** \n Providentia responde:",
-                              f"{str.capitalize(str.lower(combined_phrases))}")
+        saidas = cur.execute(f'''
+                SELECT saida1,saida2,saida3 FROM frases WHERE entrada = ?
+            ''', (dialogue,)).fetchone()
+        print(saidas)
+        if saidas:
+            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:", f"{random.choice(saidas)}")
         else:
             teaching_mode = True
-            teaching_dialogue = dialogue
+            teaching_dialogue = interaction.message
+            print(teaching_dialogue)
             await sendMessage("Não conheço essa frase.",
                               "Inicializando modo de ensinamento. Use /talkteach para me ensinar como responder à "
                               "essa frase.")
