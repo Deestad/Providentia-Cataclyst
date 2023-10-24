@@ -658,10 +658,10 @@ async def self(interaction: discord.Interaction, dialogue: str):
             ''', (dialogue,)).fetchone()
         print(saidas)
         if saidas:
-            await sendMessage("Providentia responde:", f"{random.choice(saidas)}")
+            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:", f"{random.choice(saidas)}")
         else:
             teaching_mode = True
-            teaching_dialogue = interaction.message
+            teaching_dialogue = dialogue
             await sendMessage("Não conheço essa frase.",
                               "Inicializando modo de ensinamento. Use /talkteach para me ensinar como responder à "
                               "essa frase.")
