@@ -14,6 +14,7 @@ Born from the crucible of war, Cataclyst is a relentless machine of destruction.
 - **Intelligence Gathering**: Providentia excels in covert operations, collecting vital information to bolster your server's defenses.
 - **AI Assistant**: With a loyal and engaging personality, Providentia's extensive database allows her to answer questions and address members directly, enhancing the server's communication.
 - **Utilitarian Efficiency**: Beyond its origins, Providentia now serves as a multifaceted utility, streamlining tasks and enhancing server management.
+
 [![forthebadge](https://forthebadge.com/images/featured/featured-oooo-kill-em.svg)](https://forthebadge.com)
 
 
