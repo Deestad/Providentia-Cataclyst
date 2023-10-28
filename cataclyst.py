@@ -224,7 +224,7 @@ async def self(interaction: discord.Interaction):
 async def self(interaction: discord.Interaction):
     message = (
         f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
-           Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. ''')
+           Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}''')
 
 
     embed_configuration = discord.Embed(
