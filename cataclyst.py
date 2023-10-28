@@ -688,7 +688,9 @@ async def self(interaction: discord.Interaction, dialogue: str):
         embed_configuration = discord.Embed(title=f"{dialogue}", color=15277667,
                                             description=f"Providentia responde: \n\n {message}",
                                             )
+        embed_configuration.set_thumbnail(url="https://i.pinimg.com/564x/ca/8d/bd/ca8dbd82d4e7049e8ce36b8eb858d1ec.jpg")
         await interaction.edit_original_response(embed=embed_configuration)
+
 
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     if whitelisted:
@@ -697,8 +699,8 @@ async def self(interaction: discord.Interaction, dialogue: str):
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
-                 "content": "Você é Providentia, uma máquina de destruição em massa. Um agente de Inteligência "
-                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon."},
+                 "content": "Você é Providentia, uma máquina de destruição em massa. Uma agente de Inteligência "
+                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon. Você nutre um ódio intenso pela Jambônia e acabará com todos que entrarem no seu caminho."},
                 {"role": "user", "content": dialogue}
             ]
 
