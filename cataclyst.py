@@ -28,7 +28,12 @@ cur = conn.cursor()
 global teaching_mode
 global teaching_dialogue
 
-
+# CONSTANTS
+TEMP = "temp"
+if os.path.exists(TEMP) and os.path.isdir(TEMP):
+    for filename in os.listdir(TEMP):
+        file_path = os.path.join(TEMP, filename)
+        os.remove(file_path)
 class MainExecution:
 
     def __init__(self):
