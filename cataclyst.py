@@ -20,6 +20,8 @@ import numpy as np
 from sympy import *
 import statistics
 import typing
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 conn = sqlite3.connect("MilitaryData/memory.db")
 cur = conn.cursor()
@@ -324,18 +326,31 @@ async def self(interaction: discord.Interaction, items: str):
 
 @tree.command(name="analyze", description="Realizar análise.")
 async def self(interaction: discord.Interaction, searchquery: str, searchsize: int,
-               searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str]):
+               searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str],
+               create_word_cloud: typing.Optional[bool] = False):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
 
     async def sendMessage():
         embed_configuration = discord.Embed(
             title=f"Análise de comunicação inimiga. Autor da ação: {message.author.name}",
             color=discord.Color.random(),
-            description=f"{message.content}")
+            description=f"{message.content} \n\n Timestamp: {message.created_at}")
         embed_configuration.set_thumbnail(url=message.author.avatar)
         await security_base.send(embed=embed_configuration)
 
+    async def generate_word_cloud(text):
+        ustring = (" ").join(text)
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(ustring)
+        plt.figure(figsize=(8, 4))
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis('off')
+        wordc_file = "temp/word_cloud.jpg"
+        plt.savefig(wordc_file)
+        await security_base.send(file=discord.File(wordc_file))
+
+
     if whitelisted:
+        word_cloud_text = []
         current_wargame = client.get_guild(1150898662982041641)
         security_base = client.get_channel(1165782255168409720)
         for channel in current_wargame.channels:
@@ -343,22 +358,34 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                 last_messages = [message async for message in channel.history(limit=searchsize)]
                 for message in last_messages:
                     if searchtarget_id:
-                        if str(message.author.id) == searchtarget_id:
+                        if searchtarget_id in str(message.author.id):
                             if must_contain:
                                 if message.content.__contains__(must_contain):
                                     await sendMessage()
+                                    if create_word_cloud:
+                                        word_cloud_text.append(f"{message.content}")
                                 else:
                                     pass
                             else:
                                 await sendMessage()
+                                if create_word_cloud:
+                                    word_cloud_text.append(f"{message.content}")
+                        else:
+                            pass
                     else:
                         if must_contain:
                             if message.content.__contains__(must_contain):
                                 await sendMessage()
+                                if create_word_cloud:
+                                    word_cloud_text.append(f"{message.content}")
                             else:
                                 pass
                         else:
                             await sendMessage()
+                            if create_word_cloud:
+                                word_cloud_text.append(f"{message.content}")
+        if create_word_cloud:
+            await generate_word_cloud(word_cloud_text)
 
 
 @tree.command(name="whitelist",
@@ -647,18 +674,21 @@ async def self(interaction: discord.Interaction, dialogue: str):
     dialogue = str.lower(dialogue)
     global teaching_mode
     global teaching_dialogue
+
     async def sendMessage(title, description):
         embed_configuration = discord.Embed(title=f"{title}", color=15277667,
                                             description=f"{description}",
                                             )
         await interaction.response.send_message(embed=embed_configuration)
+
     try:
         saidas = cur.execute(f'''
                 SELECT saida1,saida2,saida3 FROM frases WHERE entrada = ?
             ''', (dialogue,)).fetchone()
         print(saidas)
         if saidas:
-            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:", f"{random.choice(saidas)}")
+            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:",
+                              f"{random.choice(saidas)}")
         else:
             teaching_mode = True
             teaching_dialogue = interaction.message
@@ -672,9 +702,11 @@ async def self(interaction: discord.Interaction, dialogue: str):
 
 @tree.command(name="talkteach", description="Como providentia deve responder? Dê três opções.")
 async def self(interaction: discord.Interaction, resposta1: str, resposta2: str, resposta3: str):
-    respostas = [str.capitalize(str.lower(resposta1)), str.capitalize(str.lower(resposta2)), str.capitalize(str.lower(resposta3))]
+    respostas = [str.capitalize(str.lower(resposta1)), str.capitalize(str.lower(resposta2)),
+                 str.capitalize(str.lower(resposta3))]
     global teaching_mode
     global teaching_dialogue
+
     async def sendMessage(title, description):
         embed_configuration = discord.Embed(title=f"{title}", color=15277667,
                                             description=f"{description}",
@@ -685,15 +717,16 @@ async def self(interaction: discord.Interaction, resposta1: str, resposta2: str,
         try:
             cur.execute('''
                 INSERT INTO frases(entrada,saida1,saida2,saida3) values (?,?,?,?)
-            ''', (teaching_dialogue,respostas[0],respostas[1],respostas[2]))
+            ''', (teaching_dialogue, respostas[0], respostas[1], respostas[2]))
             conn.commit()
             teaching_mode = False
-            await sendMessage("Frases adicionadas.","Saídas ensinadas.")
+            await sendMessage("Frases adicionadas.", "Saídas ensinadas.")
         except Exception as e:
             await sendMessage("Erro.", f"Erro ocorreu durante a adição da frase. \n {e}.")
     else:
         await sendMessage("Comando indisponível.", f"Este comando pode apenas ser utilizado quando Providentia não "
                                                    f"entende uma frase através do /talk.")
+
 
 if __name__ == '__main__':
     print(
