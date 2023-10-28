@@ -2,7 +2,8 @@ import ast
 import datetime
 import typing
 import openai
-
+import elevenlabs
+import requests
 from requests import get
 
 from comandos import *
@@ -91,13 +92,23 @@ class MainExecution:
             openai_token = open("token.json")
             openai_token = json.load(openai_token)
             openai.api_key = openai_token['openaitoken']
+            elevenlabs_token = open("token.json")
+            elevenlabs_token = json.load(elevenlabs_token)
+            elevenlabs_token = elevenlabs_token['elevenlabsapikey']
+            elevenlabs.set_api_key(elevenlabs_token)
             return token
         else:
             token = input("Inform the token to activate Providentia. \n")
             openai.api_key = input("Inform the OpenAI token. This one is necessary for talking operations.\n")
+            elevenlabs_token = input("Insert token for voice application. ElevenLabs. \n")
+            try:
+                elevenlabs.set_api_key(elevenlabs_token)
+            except Exception as e:
+                print(e)
             data = {
                 'token': token,
-                'openaitoken': openai.api_key
+                'openaitoken': openai.api_key,
+                "elevenlabsapikey": elevenlabs_token
             }
             with open("token.json", "w") as file:
                 json.dump(data, file, indent=4)
@@ -226,12 +237,12 @@ async def self(interaction: discord.Interaction):
         f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
            Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}''')
 
-
     embed_configuration = discord.Embed(
         title=f"Providentia Type D {version_info['version']}",
         color=discord.Color.random(),
         description=f"{message}")
-    embed_configuration.set_image(url="https://steamuserimages-a.akamaihd.net/ugc/2028349797208462796/E03311E21C8EF797E056AA056FF4F7B743AE3B9C/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false")
+    embed_configuration.set_image(
+        url="https://steamuserimages-a.akamaihd.net/ugc/2028349797208462796/E03311E21C8EF797E056AA056FF4F7B743AE3B9C/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false")
     embed_configuration.set_footer(text=f"O ping é de {client.latency * 1000} ms")
     presentation = "Dialogues/presentation.mp3"
 
@@ -419,10 +430,12 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                             enemyinfo.append(f"{message.content}")
         if create_word_cloud:
             await generate_word_cloud(enemyinfo)
-        if providentia and searchquery == "ações" and searchsize<2:
+        if providentia and searchquery == "ações" and searchsize < 2:
             await thejudgmentofprovidentia(enemyinfo)
         else:
-            sendMessage("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
+            sendMessage(
+                "Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
+
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
@@ -706,14 +719,13 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 
 
 @tree.command(name="talk", description="Converse com a Providentia.")
-async def self(interaction: discord.Interaction, dialogue: str):
+async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Optional[bool] = False):
     async def sendMessage(message):
         embed_configuration = discord.Embed(title=f"{dialogue}", color=15277667,
                                             description=f"Providentia responde: \n\n {message}",
                                             )
         embed_configuration.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
         await interaction.edit_original_response(embed=embed_configuration)
-
 
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     if whitelisted:
@@ -729,6 +741,16 @@ async def self(interaction: discord.Interaction, dialogue: str):
 
         )
         await sendMessage(completion.choices[0].message["content"])
+        if voice:
+            audio = elevenlabs.generate(
+                text=completion.choices[0].message["content"],
+                voice="Emily",
+                model="eleven_multilingual_v2"
+            )
+            elevenlabs.save(audio,"temp/speech.mp3")
+            await interaction.channel.send(file=discord.File("temp/speech.mp3"))
+
+
 
     else:
         await sendMessage("Você não tem permissão para usar este comando.")

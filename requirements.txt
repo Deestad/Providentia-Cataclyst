@@ -5,3 +5,4 @@ sympy
 wordcloud
 matplotlib
 openai
+elevenlabs
