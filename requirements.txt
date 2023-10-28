@@ -4,3 +4,4 @@ wikipedia
 sympy
 wordcloud
 matplotlib
+openai

@@ -1,6 +1,8 @@
 import ast
 import datetime
 import typing
+import openai
+
 
 from requests import get
 
@@ -30,6 +32,8 @@ global teaching_dialogue
 
 # CONSTANTS
 TEMP = "temp"
+
+
 if os.path.exists(TEMP) and os.path.isdir(TEMP):
     for filename in os.listdir(TEMP):
         file_path = os.path.join(TEMP, filename)
@@ -84,11 +88,14 @@ class MainExecution:
             token = open("token.json")
             token = json.load(token)
             token = token["token"]
+            openai.api_key = token["openaitoken"]
             return token
         else:
             token = input("Inform the token to activate Providentia. \n")
+            openai.api_key =  input("Inform the OpenAI token. This one is necessary for talking operations.\n")
             data = {
-                'token': token
+                'token': token,
+                'openaitoken': openai.api_key
             }
             with open("token.json", "w") as file:
                 json.dump(data, file, indent=4)
@@ -676,61 +683,32 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str):
-    dialogue = str.lower(dialogue)
-    global teaching_mode
-    global teaching_dialogue
-
-    async def sendMessage(title, description):
-        embed_configuration = discord.Embed(title=f"{title}", color=15277667,
+    async def sendMessage(description):
+        embed_configuration = discord.Embed(title=f"Providentia responde:", color=15277667,
                                             description=f"{description}",
                                             )
         await interaction.response.send_message(embed=embed_configuration)
 
-    try:
-        saidas = cur.execute(f'''
-                SELECT saida1,saida2,saida3 FROM frases WHERE entrada = ?
-            ''', (dialogue,)).fetchone()
-        print(saidas)
-        if saidas:
-            await sendMessage(f"{interaction.user.name} fala {dialogue}. \n Providentia responde:",
-                              f"{random.choice(saidas)}")
-        else:
-            teaching_mode = True
-            teaching_dialogue = interaction.message
-            print(teaching_dialogue)
-            await sendMessage("Não conheço essa frase.",
-                              "Inicializando modo de ensinamento. Use /talkteach para me ensinar como responder à "
-                              "essa frase.")
-    except Exception as e:
-        print(e)
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+    default_embed = MainExecution().defaultembed
+    if whitelisted:
+        request = interaction.message.content
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system",
+                 "content": "Você é Providentia, uma máquina de destruição em massa. Um agente de Inteligência "
+                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon."},
+                {"role": "user", "content": request}
+            ]
 
+        )
+        await sendMessage(completion.choices[0].message)
 
-@tree.command(name="talkteach", description="Como providentia deve responder? Dê três opções.")
-async def self(interaction: discord.Interaction, resposta1: str, resposta2: str, resposta3: str):
-    respostas = [str.capitalize(str.lower(resposta1)), str.capitalize(str.lower(resposta2)),
-                 str.capitalize(str.lower(resposta3))]
-    global teaching_mode
-    global teaching_dialogue
-
-    async def sendMessage(title, description):
-        embed_configuration = discord.Embed(title=f"{title}", color=15277667,
-                                            description=f"{description}",
-                                            )
-        await interaction.response.send_message(embed=embed_configuration)
-
-    if teaching_mode:
-        try:
-            cur.execute('''
-                INSERT INTO frases(entrada,saida1,saida2,saida3) values (?,?,?,?)
-            ''', (teaching_dialogue, respostas[0], respostas[1], respostas[2]))
-            conn.commit()
-            teaching_mode = False
-            await sendMessage("Frases adicionadas.", "Saídas ensinadas.")
-        except Exception as e:
-            await sendMessage("Erro.", f"Erro ocorreu durante a adição da frase. \n {e}.")
     else:
-        await sendMessage("Comando indisponível.", f"Este comando pode apenas ser utilizado quando Providentia não "
-                                                   f"entende uma frase através do /talk.")
+        sendMessage("Você não tem permissão para usar este comando.")
+
+
 
 
 if __name__ == '__main__':
