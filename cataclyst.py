@@ -3,7 +3,6 @@ import datetime
 import typing
 import openai
 
-
 from requests import get
 
 from comandos import *
@@ -33,11 +32,12 @@ global teaching_dialogue
 # CONSTANTS
 TEMP = "temp"
 
-
 if os.path.exists(TEMP) and os.path.isdir(TEMP):
     for filename in os.listdir(TEMP):
         file_path = os.path.join(TEMP, filename)
         os.remove(file_path)
+
+
 class MainExecution:
 
     def __init__(self):
@@ -88,11 +88,13 @@ class MainExecution:
             token = open("token.json")
             token = json.load(token)
             token = token["token"]
-            openai.api_key = token["openaitoken"]
+            openai_token = open("token.json")
+            openai_token = json.load(openai_token)
+            openai.api_key = openai_token['openaitoken']
             return token
         else:
             token = input("Inform the token to activate Providentia. \n")
-            openai.api_key =  input("Inform the OpenAI token. This one is necessary for talking operations.\n")
+            openai.api_key = input("Inform the OpenAI token. This one is necessary for talking operations.\n")
             data = {
                 'token': token,
                 'openaitoken': openai.api_key
@@ -359,7 +361,6 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
         wordc_file = "temp/word_cloud.jpg"
         plt.savefig(wordc_file)
         await security_base.send(file=discord.File(wordc_file))
-
 
     if whitelisted:
         word_cloud_text = []
@@ -683,42 +684,39 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str):
-    async def sendMessage(description):
-        embed_configuration = discord.Embed(title=f"Providentia responde:", color=15277667,
-                                            description=f"{description}",
+    async def sendMessage(message):
+        embed_configuration = discord.Embed(title=f"{dialogue}", color=15277667,
+                                            description=f"Providentia responde: \n\n {message}",
                                             )
-        await interaction.response.send_message(embed=embed_configuration)
+        await interaction.edit_original_response(embed=embed_configuration)
 
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
-    default_embed = MainExecution().defaultembed
     if whitelisted:
-        request = interaction.message.content
+        await interaction.response.send_message("Gerando...")
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
                  "content": "Você é Providentia, uma máquina de destruição em massa. Um agente de Inteligência "
                             "Artificial feito para atacar e destruir os inimigos do Império da Lygon."},
-                {"role": "user", "content": request}
+                {"role": "user", "content": dialogue}
             ]
 
         )
-        await sendMessage(completion.choices[0].message)
+        await sendMessage(completion.choices[0].message["content"])
 
     else:
-        sendMessage("Você não tem permissão para usar este comando.")
-
-
+        await sendMessage("Você não tem permissão para usar este comando.")
 
 
 if __name__ == '__main__':
     print(
         "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     MainExecution()
-    token = MainExecution().tokenload()
+    bot_token = MainExecution().tokenload()
     version = MainExecution().setversioninfo()
     print(f"Providentia {version['version']}: {version['versiontitle']}")
-    client.run(token)
+    client.run(bot_token)
 
 conn.close()
 cur.close()
