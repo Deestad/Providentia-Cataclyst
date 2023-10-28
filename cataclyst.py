@@ -222,13 +222,20 @@ async def self(interaction: discord.Interaction):
               description="Gostaria de saber mais sobre o estado atual de desenvolvimento da Providentia?",
               )
 async def self(interaction: discord.Interaction):
-    default_embed = MainExecution().defaultembed
-    presentation = "Dialogues/presentation.mp3"
     message = (
         f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
-        Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. O ping é de {client.latency * 1000} ms''')
-    embedVar = default_embed(f"Providentia Type D {version_info['version']}", message)
-    await interaction.response.send_message(embed=embedVar)
+           Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. ''')
+
+
+    embed_configuration = discord.Embed(
+        title=f"Providentia Type D {version_info['version']}",
+        color=discord.Color.random(),
+        description=f"{message}")
+    embed_configuration.set_image(url="https://steamuserimages-a.akamaihd.net/ugc/2028349797208462796/E03311E21C8EF797E056AA056FF4F7B743AE3B9C/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false")
+    embed_configuration.set_footer(text=f"O ping é de {client.latency * 1000} ms")
+    presentation = "Dialogues/presentation.mp3"
+
+    await interaction.response.send_message(embed=embed_configuration)
     await interaction.channel.send(file=discord.File(presentation))
 
 
