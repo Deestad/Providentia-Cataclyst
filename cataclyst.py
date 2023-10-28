@@ -223,11 +223,13 @@ async def self(interaction: discord.Interaction):
               )
 async def self(interaction: discord.Interaction):
     default_embed = MainExecution().defaultembed
+    presentation = "Dialogues/presentation.mp3"
     message = (
         f'''Estamos, atualmente, na versão {version_info['version']}, entitulada {version_info['versiontitle']}. 
         Nessa versão, foram feitas as seguintes mudanças: '{version_info['lasthighlight']}'. O ping é de {client.latency * 1000} ms''')
     embedVar = default_embed(f"Providentia Type D {version_info['version']}", message)
     await interaction.response.send_message(embed=embedVar)
+    await interaction.channel.send(file=discord.File(presentation))
 
 
 @tree.command(name="explain", description="O que quer saber?")
@@ -702,7 +704,7 @@ async def self(interaction: discord.Interaction, dialogue: str):
         embed_configuration = discord.Embed(title=f"{dialogue}", color=15277667,
                                             description=f"Providentia responde: \n\n {message}",
                                             )
-        embed_configuration.set_thumbnail(url="https://i.pinimg.com/564x/ca/8d/bd/ca8dbd82d4e7049e8ce36b8eb858d1ec.jpg")
+        embed_configuration.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
         await interaction.edit_original_response(embed=embed_configuration)
 
 
@@ -714,7 +716,7 @@ async def self(interaction: discord.Interaction, dialogue: str):
             messages=[
                 {"role": "system",
                  "content": "Você é Providentia, uma máquina de destruição em massa. Uma agente de Inteligência "
-                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon. Você nutre um ódio intenso pela Jambônia e acabará com todos que entrarem no seu caminho."},
+                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon. Maquiavélica e fria, você nutre um ódio intenso pela Jambônia e acabará com todos que entrarem no seu caminho."},
                 {"role": "user", "content": dialogue}
             ]
 
