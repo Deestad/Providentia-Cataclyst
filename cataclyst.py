@@ -341,7 +341,7 @@ async def self(interaction: discord.Interaction, items: str):
 @tree.command(name="analyze", description="Realizar análise.")
 async def self(interaction: discord.Interaction, searchquery: str, searchsize: int,
                searchtarget_id: typing.Optional[str], must_contain: typing.Optional[str],
-               create_word_cloud: typing.Optional[bool] = False):
+               create_word_cloud: typing.Optional[bool] = False, providentia: typing.Optional[bool] = False):
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
 
     async def sendMessage():
@@ -362,8 +362,23 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
         plt.savefig(wordc_file)
         await security_base.send(file=discord.File(wordc_file))
 
+    async def thejudgmentofprovidentia(messages):
+        dialogue = (" ").join(messages)
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system",
+                 "content": "Você é Providentia, uma máquina de destruição em massa. Uma agente de Inteligência "
+                            "Artificial feito para atacar e destruir os inimigos do Império da Lygon. Você nutre um "
+                            "ódio intenso pela Jambônia e acabará com todos que entrarem no seu caminho."},
+                {"role": "user", "content": f"Faça uma análise das ações inimigas e me diga estratégias e ações que "
+                                            f"eu poderia fazer para se defender contra algumas delas. Somos uma nação distante e sem envolvimento, mas desejamos impedi-los. : \n\n'{dialogue}'"}
+            ]
+        )
+        await security_base.send(completion.choices[0].message["content"])
+
     if whitelisted:
-        word_cloud_text = []
+        enemyinfo = []
         current_wargame = client.get_guild(1150898662982041641)
         security_base = client.get_channel(1165782255168409720)
         for channel in current_wargame.channels:
@@ -375,31 +390,30 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                             if must_contain:
                                 if message.content.__contains__(must_contain):
                                     await sendMessage()
-                                    if create_word_cloud:
-                                        word_cloud_text.append(f"{message.content}")
+                                    enemyinfo.append(f"{message.content}")
                                 else:
                                     pass
                             else:
                                 await sendMessage()
-                                if create_word_cloud:
-                                    word_cloud_text.append(f"{message.content}")
+                                enemyinfo.append(f"{message.content}")
                         else:
                             pass
                     else:
                         if must_contain:
                             if message.content.__contains__(must_contain):
                                 await sendMessage()
-                                if create_word_cloud:
-                                    word_cloud_text.append(f"{message.content}")
+                                enemyinfo.append(f"{message.content}")
                             else:
                                 pass
                         else:
                             await sendMessage()
-                            if create_word_cloud:
-                                word_cloud_text.append(f"{message.content}")
+                            enemyinfo.append(f"{message.content}")
         if create_word_cloud:
-            await generate_word_cloud(word_cloud_text)
-
+            await generate_word_cloud(enemyinfo)
+        if providentia and searchquery == "ações" and searchsize<2:
+            await thejudgmentofprovidentia(enemyinfo)
+        else:
+            sendMessage("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
