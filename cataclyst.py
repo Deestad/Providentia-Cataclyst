@@ -37,6 +37,8 @@ if os.path.exists(TEMP) and os.path.isdir(TEMP):
     for filename in os.listdir(TEMP):
         file_path = os.path.join(TEMP, filename)
         os.remove(file_path)
+else:
+    os.mkdir(TEMP)
 
 
 class MainExecution:
