@@ -53,17 +53,20 @@ class MainExecution:
         self.initializedatabase()
 
     def checkwhitelist(self, userid):
+        userid = userid
+        try:
+            whitelisted = cur.execute(f'''SELECT userid FROM whitelist
+                                                        WHERE userid = {userid}
+    
+                                                            ''').fetchone()
+            if whitelisted:
+                print("Whitelisted user used a command.")
+                return whitelisted
+        except ValueError:
+            return False
+        except Exception as err:
+            print(err)
 
-        whitelist = cur.execute('''SELECT userid FROM whitelist;
-        
-        ''').fetchone()
-
-        userid = str(userid)
-        print(whitelist)
-        id_check = any(user in userid for user in whitelist)
-        if id_check:
-            print("Whitelisted user used a command.")
-        return id_check
 
     def initializedatabase(self):
         cur.execute('''
@@ -433,23 +436,21 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
         if providentia and searchquery == "ações" and searchsize < 2:
             await thejudgmentofprovidentia(enemyinfo)
         else:
-            sendMessage(
-                "Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
+            await interaction.response.send_message("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
 
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
               )
-async def self(interaction: discord.Interaction, id: str, add_remove: str):
+async def self(interaction: discord.Interaction, userid: str, add_remove: str):
+    id = int(userid)
     whitelisted = MainExecution().checkwhitelist(interaction.user.id)
     default_embed = MainExecution().defaultembed
     if whitelisted:
         try:
-            userid = id
-            id = int(id)
             if add_remove == 'add':
                 whitelist = cur.execute(f'''SELECT userid FROM whitelist
-                                            WHERE userid = {id}
+                                            WHERE userid = {userid}
 
                                                 ''').fetchone()
                 print(whitelist)
@@ -495,6 +496,8 @@ async def self(interaction: discord.Interaction, id: str, add_remove: str):
         except ValueError:
             embedVar = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
             await interaction.response.send_message(embed=embedVar)
+        except Exception as e:
+            print(e)
     else:
         embedVar = default_embed(f"Você não tem permissão para usar este comando.", f"Você está fora da whitelist.")
         await interaction.response.send_message(embed=embedVar)
@@ -747,13 +750,13 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
                 voice="Emily",
                 model="eleven_multilingual_v2"
             )
-            elevenlabs.save(audio,"temp/speech.mp3")
+            elevenlabs.save(audio, "temp/speech.mp3")
             await interaction.channel.send(file=discord.File("temp/speech.mp3"))
 
 
 
     else:
-        await sendMessage("Você não tem permissão para usar este comando.")
+        await interaction.response.send_message("Você não tem permissão para usar este comando.")
 
 
 if __name__ == '__main__':
