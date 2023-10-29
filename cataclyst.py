@@ -55,15 +55,15 @@ class MainExecution:
         self.initializedatabase()
 
     def checkwhitelist(self, userid):
-        userid = userid
+        userid = str(userid)
         try:
             whitelisted = cur.execute(f'''SELECT userid FROM whitelist
-                                                        WHERE userid = {userid}
+                                                        WHERE userid = (?)
     
-                                                            ''').fetchone()
+                                                            ''', (userid,)).fetchone()
             if whitelisted:
                 print("Whitelisted user used a command.")
-                return whitelisted
+                return True
         except ValueError:
             return False
         except Exception as err:
@@ -727,7 +727,7 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Optional[bool] = False):
     async def sendMessage(message):
-        embed_configuration = discord.Embed(title=f"{dialogue}", color=15277667,
+        embed_configuration = discord.Embed(title=f"{dialogue if len(dialogue) < 256 else 'Questão analisada...'}", color=15277667,
                                             description=f"Providentia responde: \n\n {message}",
                                             )
         embed_configuration.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
