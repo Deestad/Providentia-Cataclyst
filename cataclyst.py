@@ -433,10 +433,11 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                             enemyinfo.append(f"{message.content}")
         if create_word_cloud:
             await generate_word_cloud(enemyinfo)
-        if providentia and searchquery == "ações" and searchsize < 2:
-            await thejudgmentofprovidentia(enemyinfo)
-        else:
-            await interaction.response.send_message("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
+        if providentia:
+            if providentia and searchquery == "ações" and searchsize < 2:
+                await thejudgmentofprovidentia(enemyinfo)
+            else:
+                await interaction.response.send_message("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
 
 
 @tree.command(name="whitelist",
