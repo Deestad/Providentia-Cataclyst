@@ -176,15 +176,21 @@ class aclient(discord.Client):
             discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
 
     async def on_message(self, message):
+        whitelisted = MainExecution().checkwhitelist(message.author.id)
         channel = message.channel.name
         # SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
-        if str.lower(message.content.startswith("Providentia,")):
-            if message.content.__contains__("mate-o"):
-                message.channel.send("O alvo será executado, senhor.")
-                message.channel.send("https://discord.com/channels/@me/1160809901002588170/1168569675358154772")
-
+        if whitelisted:
+            if str.lower(message.content).startswith("providentia"):
+                order = message.content.replace(".","").replace(",","").replace("?","").replace("!","")
+                if order.__contains__("preparar"):
+                    await message.channel.send("O alvo será executado conforme a ordem de vossa majestade.")
+                    await message.channel.send("https://tenor.com/view/star-wars-jedi-fallen-order-purge-trooper"
+                                               "-charging-aiming-blaster-gif-23094719")
+                if order.__contains__("fogo"):
+                    await message.channel.send("FOGO!")
+                    await message.channel.send("https://tenor.com/view/volley-fire-gif-22469550")
 
         elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
             author = message.author.name
