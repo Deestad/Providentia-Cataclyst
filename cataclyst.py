@@ -180,6 +180,12 @@ class aclient(discord.Client):
         # SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
+        if str.lower(message.content.startswith("Providentia,")):
+            if message.content.__contains__("mate-o"):
+                message.channel.send("O alvo será executado, senhor.")
+                message.channel.send("https://discord.com/channels/@me/1160809901002588170/1168569675358154772")
+
+
         elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
             author = message.author.name
             authorimage = message.author.avatar
