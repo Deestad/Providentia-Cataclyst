@@ -24,6 +24,7 @@ import statistics
 import typing
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+from urllib import parse, request
 
 conn = sqlite3.connect("MilitaryData/memory.db")
 cur = conn.cursor()
@@ -68,7 +69,6 @@ class MainExecution:
             return False
         except Exception as err:
             print(err)
-
 
     def initializedatabase(self):
         cur.execute('''
@@ -182,15 +182,48 @@ class aclient(discord.Client):
         if message.author.id == client.user.id:
             pass
         if whitelisted:
-            if str.lower(message.content).startswith("providentia"):
-                order = message.content.replace(".","").replace(",","").replace("?","").replace("!","")
-                if order.__contains__("preparar"):
-                    await message.channel.send("O alvo será executado conforme a ordem de vossa majestade.")
-                    await message.channel.send("https://tenor.com/view/star-wars-jedi-fallen-order-purge-trooper"
-                                               "-charging-aiming-blaster-gif-23094719")
-                if order.__contains__("fogo"):
-                    await message.channel.send("FOGO!")
-                    await message.channel.send("https://tenor.com/view/volley-fire-gif-22469550")
+            if str.lower(message.content).startswith("providentia, eu te ordeno"):
+                url = "http://api.giphy.com/v1/gifs/search"
+                reaction = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    max_tokens=10,
+                    messages=[
+
+                        {"role": "system",
+                         "content": "Você é uma soldado. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador com uma reação física ou emocional:"},
+                        {"role": "user",
+                         "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
+                    ]
+
+                )
+                context = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    max_tokens=10,
+                    messages=[
+
+                        {"role": "system",
+                         "content": "Give a description of what is going on in a cinematic scene, but just use two "
+                                    "words. This will be used to search for a gif in Giphy."},
+                        {"role": "user",
+                         "content": f"Describe in two words what happens next in the scene: {message.content}"}
+                    ]
+
+                )
+                context = context.choices[0].message["content"]
+                context.replace(" ", "-")
+                print(context)
+                params = parse.urlencode({
+                    "q": context,
+                    "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                    "limit": "5"
+                })
+                with request.urlopen("".join((url, "?", params))) as response:
+                    data = json.loads(response.read())
+                    gif_url = data['data'][0]['images']['fixed_height']['url']
+                await message.channel.send(f"{reaction.choices[0].message['content']}")
+                await message.channel.send(f"{gif_url}")
+
+
 
         elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
             author = message.author.name
@@ -451,7 +484,8 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
             if providentia and searchquery == "ações" and searchsize < 2:
                 await thejudgmentofprovidentia(enemyinfo)
             else:
-                await interaction.response.send_message("Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
+                await interaction.response.send_message(
+                    "Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
 
 
 @tree.command(name="whitelist",
@@ -739,7 +773,8 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 @tree.command(name="talk", description="Converse com a Providentia.")
 async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Optional[bool] = False):
     async def sendMessage(message):
-        embed_configuration = discord.Embed(title=f"{dialogue if len(dialogue) < 256 else 'Questão analisada...'}", color=15277667,
+        embed_configuration = discord.Embed(title=f"{dialogue if len(dialogue) < 256 else 'Questão analisada...'}",
+                                            color=15277667,
                                             description=f"Providentia responde: \n\n {message}",
                                             )
         embed_configuration.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
