@@ -182,7 +182,7 @@ class aclient(discord.Client):
         if message.author.id == client.user.id:
             pass
         if whitelisted:
-            if str.lower(message.content).startswith("providentia, eu te ordeno"):
+            if str.lower(message.content).startswith("providentia,"):
                 url = "http://api.giphy.com/v1/gifs/search"
                 reaction = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
@@ -190,7 +190,7 @@ class aclient(discord.Client):
                     messages=[
 
                         {"role": "system",
-                         "content": "Você é uma soldado. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador com uma reação física ou emocional:"},
+                         "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
                         {"role": "user",
                          "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
                     ]
@@ -202,10 +202,10 @@ class aclient(discord.Client):
                     messages=[
 
                         {"role": "system",
-                         "content": "Give a description of what is going on in a cinematic scene, but just use two "
+                         "content": "Narrate this scene happens, but just use three "
                                     "words. This will be used to search for a gif in Giphy."},
                         {"role": "user",
-                         "content": f"Describe in two words what happens next in the scene: {message.content}"}
+                         "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
                     ]
 
                 )
