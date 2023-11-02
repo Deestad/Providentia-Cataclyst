@@ -183,12 +183,12 @@ class aclient(discord.Client):
         # SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
-        if str.lower(message.content).__contains__("atira na providentia"):
+        if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__("providentia"):
             await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
-
+        elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__("bat") and str.lower(message.content).__contains__("providentia"):
+            await message.channel.send("https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
         # WHITELIST FUNCTIONS
         if whitelisted:
-            print(message.content)
             if str.lower(message.content).startswith("providentia,"):
                 guild = client.get_guild(message.guild.id)
                 targets = []
@@ -252,8 +252,6 @@ class aclient(discord.Client):
                     await message.channel.send(f"{reaction.choices[0].message['content']}")
                     await message.channel.send(f"{gif_url}")
 
-
-
         elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
             author = message.author.name
             authorimage = message.author.avatar
@@ -274,6 +272,11 @@ class aclient(discord.Client):
             embed_configuration.set_image(url=message.attachments[0].url)
 
             await security_base.send(embed=embed_configuration)
+        else:
+            if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__("providên"):
+                message.channel.send("https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
+
+
 
 
 # EVENTS
