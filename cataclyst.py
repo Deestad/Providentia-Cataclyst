@@ -130,6 +130,7 @@ class MainExecution:
     def callIntents(self):
         self.intents = discord.Intents.default()
         self.intents.message_content = True
+        self.intents.members = True
         intents = self.intents
         return intents
 
@@ -178,50 +179,78 @@ class aclient(discord.Client):
     async def on_message(self, message):
         whitelisted = MainExecution().checkwhitelist(message.author.id)
         channel = message.channel.name
+
         # SPYBOT FUNCTIONALITY
         if message.author.id == client.user.id:
             pass
+        if str.lower(message.content).__contains__("atira na providentia"):
+            await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
+
+        # WHITELIST FUNCTIONS
         if whitelisted:
+            print(message.content)
             if str.lower(message.content).startswith("providentia,"):
-                url = "http://api.giphy.com/v1/gifs/search"
-                reaction = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    max_tokens=10,
-                    messages=[
+                guild = client.get_guild(message.guild.id)
+                targets = []
+                if str.lower(message.content).__contains__("expuls"):
+                    order = str.lower(message.content).split(" ")
+                    for word in order:
+                        if word.startswith("<@"):
+                            targets.append(word)
+                    for victim in targets:
+                        victim = victim.replace("&", "")
+                        victim = victim.replace("<@", "")
+                        victim = victim.replace(">", "")
+                        victim = guild.get_member(int(victim))
+                        try:
+                            await discord.Member.kick(victim, reason="Execução.")
+                            await message.channel.send(f"Operação concluída. {victim} eliminado.")
+                        except Exception as e:
+                            print(e)
+                            if isinstance(e, commands.MissingPermissions):
+                                await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
+                            elif isinstance(e, commands.MissingRequiredArgument):
+                                await message.channel.send(f"Especifique o alvo, senhor.")
+                else:
+                    url = "http://api.giphy.com/v1/gifs/search"
+                    reaction = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        max_tokens=10,
+                        messages=[
 
-                        {"role": "system",
-                         "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
-                        {"role": "user",
-                         "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
-                    ]
+                            {"role": "system",
+                             "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
+                            {"role": "user",
+                             "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
+                        ]
 
-                )
-                context = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    max_tokens=10,
-                    messages=[
+                    )
+                    context = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        max_tokens=10,
+                        messages=[
 
-                        {"role": "system",
-                         "content": "Narrate this scene happens, but just use three "
-                                    "words. This will be used to search for a gif in Giphy."},
-                        {"role": "user",
-                         "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
-                    ]
+                            {"role": "system",
+                             "content": "Narrate this scene happens, but just use three "
+                                        "words. This will be used to search for a gif in Giphy."},
+                            {"role": "user",
+                             "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
+                        ]
 
-                )
-                context = context.choices[0].message["content"]
-                context.replace(" ", "-")
-                print(context)
-                params = parse.urlencode({
-                    "q": context,
-                    "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
-                    "limit": "5"
-                })
-                with request.urlopen("".join((url, "?", params))) as response:
-                    data = json.loads(response.read())
-                    gif_url = data['data'][0]['images']['fixed_height']['url']
-                await message.channel.send(f"{reaction.choices[0].message['content']}")
-                await message.channel.send(f"{gif_url}")
+                    )
+                    context = context.choices[0].message["content"]
+                    context.replace(" ", "-")
+                    print(context)
+                    params = parse.urlencode({
+                        "q": context,
+                        "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                        "limit": "5"
+                    })
+                    with request.urlopen("".join((url, "?", params))) as response:
+                        data = json.loads(response.read())
+                        gif_url = data['data'][0]['images']['fixed_height']['url']
+                    await message.channel.send(f"{reaction.choices[0].message['content']}")
+                    await message.channel.send(f"{gif_url}")
 
 
 
