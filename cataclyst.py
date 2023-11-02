@@ -274,7 +274,7 @@ class aclient(discord.Client):
             await security_base.send(embed=embed_configuration)
         else:
             if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__("providên"):
-                message.channel.send("https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
+                await message.channel.send("https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
 
 
 
