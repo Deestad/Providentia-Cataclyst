@@ -193,7 +193,10 @@ class aclient(discord.Client):
             if str.lower(message.content).startswith("providentia,"):
                 guild = client.get_guild(message.guild.id)
                 targets = []
-                if str.lower(message.content).__contains__("expuls"):
+                if str.lower(message.content).__contains__("quantos canais"):
+                    guild_length = len(message.guild.channels)
+                    await message.channel.send(f"Este servidor tem {guild_length}, senhor.")
+                elif str.lower(message.content).__contains__("expuls"):
                     order = str.lower(message.content).split(" ")
                     for word in order:
                         if word.startswith("<@"):
@@ -379,7 +382,7 @@ async def self(interaction: discord.Interaction, expression: str):
     default_embed = MainExecution().defaultembed
     if whitelisted:
         try:
-            resultado = ast.literal_eval(expression)
+            resultado = eval(expression)
             embedVar = default_embed(f"Dada a expressão, {expression}:", f"O resultado é: {resultado}")
             await interaction.response.send_message(embed=embedVar)
         except NameError:
