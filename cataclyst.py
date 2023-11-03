@@ -4,6 +4,7 @@ import typing
 import openai
 import elevenlabs
 import requests
+import re
 from requests import get
 
 from comandos import *
@@ -286,6 +287,8 @@ tree = app_commands.CommandTree(client)
 version_info = MainExecution().setversioninfo()
 user_info = MainExecution().setuserinfo()
 
+async def lackPermissions(interaction: discord.Interaction):
+    await interaction.response.send_message("Desculpe, você não tem permissão para usar este comando.")
 
 @tree.command(name="ajuda",
               description="Listagem dos comandos atualmente disponíveis.",
@@ -384,9 +387,7 @@ async def self(interaction: discord.Interaction, expression: str):
             await interaction.response.send_message(embed=embedVar)
 
     else:
-        embedVar = default_embed("Você não tem permissão para usar este comando.",
-                                 "Usuário fora da Whitelist.")
-        await interaction.response.send_message(embed=embedVar)
+        await lackPermissions(interaction)
 
 
 @tree.command(name="equation",
@@ -519,6 +520,53 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                 await interaction.response.send_message(
                     "Perdões, este comando ainda é bastante limitado. Especifique o canal necessário e use um tamanho de pesquisa menor.")
 
+@tree.command(name="statisticalanalysis", description="Faça uma análise estatística de uma área.")
+async def self(interaction: discord.Interaction, searchsize: int, query: str):
+    query = str.lower(query)
+    whitelisted = MainExecution().checkwhitelist(interaction.user.id)
+
+    async def BuildGraph(messages,time, query):
+        plt.bar(month_counts.keys(), month_counts.values())
+        plt.xlabel('Mês')
+        plt.ylabel(f'Vezes em que {query} foi mencionado')
+        plt.xticks(rotation=45)
+        plt.title = f"Vezes em que foi dito neste servidor: {query}"
+        graph_file = "temp/analysis_graph.jpg"
+        plt.savefig(graph_file)
+        await interaction.channel.send(file=discord.File(graph_file))
+
+    if whitelisted:
+        await interaction.response.send_message("Iniciando análise.")
+        analysis_messages = []
+        analysis_timestamp = []
+        for channel in interaction.guild.channels:
+            if isinstance(channel, discord.TextChannel):
+                message_history = [message async for message in channel.history(limit=searchsize)]
+                for message in message_history:
+                    if str.lower(message.content).__contains__(query):
+                        analysis_messages.append(message.content)
+                        analysis_timestamp.append(message.created_at)
+        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                  "November", "December"]
+
+        # Create a dictionary to store the counts of each month
+        month_counts = {month: 0 for month in months}
+
+        # Loop through analysis_messages and count the months
+        for message, timestamp in zip(analysis_messages, analysis_timestamp):
+            for month in months:
+                if month in timestamp.strftime("%B") and str.lower(message).__contains__(query):
+                    month_counts[month] += 1
+
+
+
+
+
+        await BuildGraph(analysis_messages, analysis_timestamp, query)
+    else:
+        await lackPermissions(interaction)
+
+
 
 @tree.command(name="whitelist",
               description="Adicionar usuário a lista de operações da Providentia.",
@@ -580,8 +628,7 @@ async def self(interaction: discord.Interaction, userid: str, add_remove: str):
         except Exception as e:
             print(e)
     else:
-        embedVar = default_embed(f"Você não tem permissão para usar este comando.", f"Você está fora da whitelist.")
-        await interaction.response.send_message(embed=embedVar)
+        await lackPermissions(interaction)
 
 
 @tree.command(name="censurar",
@@ -838,8 +885,7 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
 
 
     else:
-        await interaction.response.send_message("Você não tem permissão para usar este comando.")
-
+        await lackPermissions(interaction)
 
 if __name__ == '__main__':
     print(
