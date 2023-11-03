@@ -194,8 +194,11 @@ class aclient(discord.Client):
                 guild = client.get_guild(message.guild.id)
                 targets = []
                 if str.lower(message.content).__contains__("quantos canais"):
-                    guild_length = len(message.guild.channels)
-                    await message.channel.send(f"Este servidor tem {guild_length}, senhor.")
+                    channels_count = 0
+                    for channel in message.guild.channels:
+                        if isinstance(channel, discord.TextChannel):
+                            channels_count += 1
+                    await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
                 elif str.lower(message.content).__contains__("expuls"):
                     order = str.lower(message.content).split(" ")
                     for word in order:
