@@ -46,7 +46,7 @@ else:
 class MainExecution:
 
     def __init__(self):
-        self.model = input("Modelo 1 ou modelo 2?")
+        self.model = 2
         self.intents = None
         self.version_title = None
         self.version = None
