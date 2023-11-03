@@ -46,7 +46,7 @@ else:
 class MainExecution:
 
     def __init__(self):
-
+        self.model = input("Modelo 1 ou modelo 2?")
         self.intents = None
         self.version_title = None
         self.version = None
@@ -94,7 +94,10 @@ class MainExecution:
             print("Token detected.")
             token = open("token.json")
             token = json.load(token)
-            token = token["token"]
+            if self.model == 1:
+                token = token["token"]
+            elif self.model == 2:
+                token = token["backup"]
             openai_token = open("token.json")
             openai_token = json.load(openai_token)
             openai.api_key = openai_token['openaitoken']
