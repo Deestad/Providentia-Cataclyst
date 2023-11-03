@@ -188,7 +188,7 @@ class aclient(discord.Client):
             await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
         elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__("bat") and str.lower(message.content).__contains__("providentia"):
             await message.channel.send("https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
-        # WHITELIST FUNCTIONS
+        #  WHITELIST FUNCTIONS
         if whitelisted:
             if str.lower(message.content).startswith("providentia,"):
                 guild = client.get_guild(message.guild.id)
