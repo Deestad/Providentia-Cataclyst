@@ -6,3 +6,4 @@ wordcloud
 matplotlib
 openai
 elevenlabs
+peewee
