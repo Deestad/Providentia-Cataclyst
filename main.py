@@ -62,6 +62,7 @@ else:
 lista_rps = RPS.select()
 censura = Censura.select()
 
+
 class aclient(discord.Client):
 
     def __init__(self):
@@ -93,16 +94,19 @@ class aclient(discord.Client):
     async def on_message(self, message):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
+        spy_list = ["ações", "aleatorio", "diplomacia"]
 
         # SPYBOT FUNCTIONALITY
-        if message.author.id == client.user.id:
-            pass
-        if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__("providentia"):
-            await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
-        elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__(
-                "bat") and str.lower(message.content).__contains__("providentia"):
-            await message.channel.send(
-                "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
+        if not any(victim in channel for victim in spy_list):
+            if message.author.id == client.user.id:
+                pass
+            if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__(
+                    "providentia"):
+                await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
+            elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__(
+                    "bat") and str.lower(message.content).__contains__("providentia"):
+                await message.channel.send(
+                    "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
         #  WHITELIST FUNCTIONS
         if whitelisted:
             if str.lower(message.content).startswith("providentia,"):
@@ -174,13 +178,13 @@ class aclient(discord.Client):
                     await message.channel.send(f"{reaction.choices[0].message['content']}")
                     await message.channel.send(f"{gif_url}")
 
-        elif channel == "ações" or channel == "aleatorio" or channel == "diplomacia":
+        elif any(victim in channel for victim in spy_list):
             author = message.author.name
             authorimage = message.author.avatar
             security_base = client.get_channel(1165782255168409720)
             embed = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
-                                                color=discord.Color.random(),
-                                                description=f"{message.content}")
+                                  color=discord.Color.random(),
+                                  description=f"{message.content}")
             embed.set_thumbnail(url=authorimage)
 
             await security_base.send(embed=embed)
@@ -189,8 +193,8 @@ class aclient(discord.Client):
             authorimage = message.author.avatar
             security_base = client.get_channel(1165782255168409720)
             embed = discord.Embed(title=f"Ficha inimiga detectada:",
-                                                color=discord.Color.random(),
-                                                description=f"")
+                                  color=discord.Color.random(),
+                                  description=f"")
             embed.set_image(url=message.attachments[0].url)
 
             await security_base.send(embed=embed)
@@ -207,7 +211,6 @@ client = aclient()
 tree = app_commands.CommandTree(client)
 
 
-
 async def lackPermissions(interaction: discord.Interaction):
     console_log("Usuário tentou utilizar comandos sem permissão.")
     await interaction.response.send_message("Desculpe, você não tem permissão para usar este comando.")
@@ -218,7 +221,7 @@ async def lackPermissions(interaction: discord.Interaction):
               )
 async def self(interaction: discord.Interaction):
     embed = discord.Embed(title="Comandos da Providentia:", color=0x2ecc71,
-                                        description="Abaixo, você encontrará uma lista das funcionalidades disponíveis.")
+                          description="Abaixo, você encontrará uma lista das funcionalidades disponíveis.")
 
     embed.set_image(
         url="https://camo.githubusercontent.com/019f7739ee9d317a8ce42ce19b4b7070569aea7614313f964bb0bd082cf28062/68747470733a2f2f7062732e7477696d672e636f6d2f6d656469612f455a786a4f6751587341514254354c3f666f726d61743d6a7067266e616d653d6d656469756d")
@@ -508,7 +511,7 @@ async def self(interaction: discord.Interaction, userid: str, add_remove: str):
                         await interaction.response.send_message(embed=embed)
                     else:
                         embed = default_embed(f"Não pude usar este comando.",
-                                                 f"Usuário já está na Whitelist.")
+                                              f"Usuário já está na Whitelist.")
                         await interaction.response.send_message(embed=embed)
                 except ValueError:
                     embed = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
@@ -522,7 +525,8 @@ async def self(interaction: discord.Interaction, userid: str, add_remove: str):
                     condition = (Whitelist.get(Whitelist.userid == userid))
                     remove_from_whitelist = Whitelist.delete().where(condition).execute()
                     console_log(f"Usuário {userid} removido da Whitelist.")
-                    embed = default_embed(f"Sucesso.", f"{remove_from_whitelist} usuário removido da Whitelist. ID: {userid}")
+                    embed = default_embed(f"Sucesso.",
+                                          f"{remove_from_whitelist} usuário removido da Whitelist. ID: {userid}")
                     await interaction.response.send_message(embed=embed)
                 except ValueError:
                     embed = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
@@ -538,6 +542,7 @@ async def self(interaction: discord.Interaction, userid: str, add_remove: str):
             console_log("Erro na remoção da Whitelist:", e)
     else:
         await lackPermissions(interaction)
+
 
 @tree.command(name="censurar", description="Censurar palavras para uso do bot.")
 async def self(interaction: discord.Interaction, palavra: str):
@@ -556,16 +561,17 @@ async def self(interaction: discord.Interaction, palavra: str):
 
             console_log(f"{len(palavras_censuradas)} palavras censuradas.")
             await interaction.response.send_message("Censurando...")
-            await interaction.edit_original_response(embed=default_embed("Censurado com sucesso.", f"{len(palavras_censuradas)} palavras censuradas."))
+            await interaction.edit_original_response(
+                embed=default_embed("Censurado com sucesso.", f"{len(palavras_censuradas)} palavras censuradas."))
         except Exception as e:
-            console_log("Erro detectado:",e)
-
+            console_log("Erro detectado:", e)
 
 
 @tree.command(name="confederate", description="Urra")
 async def self(interaction: discord.Interaction):
     await interaction.response.send_message(
         "https://cdn.discordapp.com/attachments/1165444969641812059/1165445020892008498/Dixie.mp4?ex=6546e041&is=65346b41&hm=ef5b2039c0708574d3844d215cc09626e5bb03af38c11750986a6cdf65947730&")
+
 
 @tree.command(name="criar", description="Criar novo RP.")
 async def self(interaction: discord.Interaction, nome_rp: str, nome_personagem: str, genero: str, personalidade: str,
@@ -607,6 +613,8 @@ async def self(interaction: discord.Interaction):
         embed.add_field(name=f"{i}.", value=f" {item}")
         i += 1
     await interaction.response.send_message(embed=embed)
+
+
 @tree.command(name="ficharp", description="Verificar ficha de um usuário.")
 async def self(interaction: discord.Interaction, nome_rp: str, personagem: str):
     personagem = personagem.lower()
@@ -628,6 +636,7 @@ async def self(interaction: discord.Interaction, nome_rp: str, personagem: str):
         embedVar = default_embed("Erro", "Ficha não encontrada.")
         await interaction.response.send_message(embed=embedVar)
 
+
 @tree.command(name="inforp", description="Verificar as informações de um RP.")
 async def self(interaction: discord.Interaction, nome: str):
     nome = nome.lower()
@@ -645,6 +654,7 @@ async def self(interaction: discord.Interaction, nome: str):
         default_embed = Initialization().defaultembed
         embedVar = default_embed("Erro", "RP não encontrado.")
         await interaction.response.send_message(embed=embedVar)
+
 
 @tree.command(name="criarrp", description="Criar um Roleplay (rp).")
 async def self(interaction: discord.Interaction, nome: str, descricao: str, imagem: str):
@@ -690,7 +700,7 @@ async def self(interaction: discord.Interaction, titulo: str):
             await interaction.response.send_message(embed=embedVar)
 
     except Exception as e:
-        console_log("Erro detectado:",e)
+        console_log("Erro detectado:", e)
 
 
 @tree.command(name="interpretarnpc",
@@ -698,15 +708,13 @@ async def self(interaction: discord.Interaction, titulo: str):
 async def self(interaction: discord.Interaction, nomenpc: str, titulo: typing.Optional[str],
                image: typing.Optional[str], dialogo: str, ):
     embed = discord.Embed(title=f"", color=15277667, description=f"{dialogo}",
-                                        timestamp=datetime.datetime.now())
+                          timestamp=datetime.datetime.now())
     imagem = (f"{image}" if image else "https://i.pinimg.com/564x/ef/d9/46/efd946986bfc8ab131353d84fd6ce538.jpg")
     if titulo:
         embed.set_author(name=f"{nomenpc}, {titulo} diz:", icon_url=imagem)
     else:
         embed.set_author(name=f"{nomenpc} diz:", icon_url=imagem)
     await interaction.response.send_message(embed=embed)
-
-
 
 
 @tree.command(name="citacao",
@@ -733,16 +741,14 @@ async def self(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 
-
-
 @tree.command(name="acaowargame",
               description="Faça uma ação estetizada em um Wargame.")
 async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, descricao: str,
                imagem: typing.Optional[str]):
     embed = discord.Embed(title=f"{titulo}", color=15277667, description=f"{descricao}",
-                                        timestamp=datetime.datetime.now())
+                          timestamp=datetime.datetime.now())
     embed.set_footer(text=f"Ação {numeroacao} de 3",
-                                   icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
+                     icon_url="https://www.google.com.br/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FFlag_of_Singapore&psig=AOvVaw3hPg15k8LYBW0R8ByJP-9W&ust=1697997056697000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCdhI3ah4IDFQAAAAAdAAAAABAE")
 
     delete_button = discord.ui.Button(label='Deletar ação', style=discord.ButtonStyle.danger)
     view = discord.ui.View()
@@ -761,9 +767,9 @@ async def self(interaction: discord.Interaction, numeroacao: int, titulo: str, d
 async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Optional[bool] = False):
     async def sendMessage(message):
         embed = discord.Embed(title=f"{dialogue if len(dialogue) < 256 else 'Questão analisada...'}",
-                                            color=15277667,
-                                            description=f"Providentia responde: \n\n {message}",
-                                            )
+                              color=15277667,
+                              description=f"Providentia responde: \n\n {message}",
+                              )
         embed.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
         await interaction.edit_original_response(embed=embed)
 
@@ -795,6 +801,7 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
     else:
         await lackPermissions(interaction)
 
+
 if __name__ == '__main__':
     console_log(
         "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
@@ -817,4 +824,3 @@ if __name__ == '__main__':
         logging.error(err)
         raise
     atexit.register(termination)
-
