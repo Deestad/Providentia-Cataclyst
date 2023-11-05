@@ -98,7 +98,7 @@ class aclient(discord.Client):
 
         if not any(victim in channel for victim in spy_list):
             if message.author.id != client.user.id:
-                roll = random.randint(1,15)
+                roll = random.randint(1,9)
                 if roll == 15:
                     last_messages = [message async for message in message.channel.history(limit=100)]
                     messages = []

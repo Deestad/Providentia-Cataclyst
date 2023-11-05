@@ -42,7 +42,7 @@ def termination():
 
 class Initialization:
     def __init__(self):
-        self.model = 1
+        self.model = 2
         self.bot_token = None
         self.ai_token = None
         self.voice_token = None
