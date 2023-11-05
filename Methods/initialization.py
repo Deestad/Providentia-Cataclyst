@@ -17,6 +17,7 @@ from peewee import Model, CharField, SqliteDatabase
 import openai
 import elevenlabs
 import discord
+import PySimpleGUI as sg
 # PROJECT IMPORTS
 # Project-Specific Imports
 from Methods.system_methods import console_log
@@ -25,12 +26,14 @@ from Methods.database_models import *
 
 
 
+sg.theme('DarkPurple2')
+
 # CONSTANTS
 CLIENT_FILE = 'google.json'
 TOKEN_FILE = "token.json"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-USER_INFO_FILE = "MestreSaraData/userinfo.json"
+USER_INFO_FILE = "MilitaryData/userinfo.json"
 VERSION_INFO_FILE = "versioninfo.json"
 
 
@@ -42,7 +45,7 @@ def termination():
 
 class Initialization:
     def __init__(self):
-        self.model = 2
+        self.model = None
         self.bot_token = None
         self.ai_token = None
         self.voice_token = None
@@ -63,9 +66,26 @@ class Initialization:
 
         db.create_tables([Whitelist, RPS, FichaRP, Censura], safe=True)
 
-    def load_configuration(self, elevenlabs_token=None):
+    def load_configuration(self):
         with open(VERSION_INFO_FILE, encoding='utf-8') as version_info_file:
             self.version_info = json.load(version_info_file)
+            get_model = [ [sg.Button('Modelo I: Lygon'),
+                           [sg.Button('Modelo II: Espionagem')]]
+
+            ]
+            window = sg.Window('Choose the used model', get_model)
+            while True:
+                event,values = window.read()
+
+                if event == "Modelo I: Lygon":
+                    self.model = 1
+                    break
+                elif event == "Modelo II: Espionagem":
+                    self.model = 2
+                    break
+                if event == sg.WIN_CLOSED:
+                    break
+            window.close()
 
 
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):
