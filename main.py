@@ -75,7 +75,7 @@ class aclient(discord.Client):
         if not self.synced:
             await tree.sync()
         await self.change_presence(status=discord.Status.dnd, activity=(
-            discord.Activity(type=discord.ActivityType.listening, name="aos meios de comunicações inimigos.")))
+            discord.Activity(type=discord.ActivityType.listening, name=random.choice(lists.atividades_da_providentia))))
 
     @tasks.loop(minutes=10)
     async def change_presence_task(self):
@@ -84,7 +84,7 @@ class aclient(discord.Client):
                 status=discord.Status.dnd,
                 activity=discord.Activity(
                     type=discord.ActivityType.listening,
-                    name=random.choice(lists.variacoes)
+                    name=random.choice(lists.atividades_da_providentia)
                 )
             )
         except Exception as e:
@@ -96,113 +96,136 @@ class aclient(discord.Client):
         channel = message.channel.name
         spy_list = ["ações", "aleatorio", "diplomacia"]
 
+        if not any(victim in channel for victim in spy_list):
+            if message.author.id != client.user.id:
+                roll = random.randint(1,15)
+                if roll == 15:
+                    last_messages = [message async for message in message.channel.history(limit=100)]
+                    messages = []
+                    words = []
+                    for item in last_messages:
+                        if len(item.content) > 2:
+                            messages.append(item.content)
+                    i = random.randint(4, 8)
+                    print(messages)
+                    for n in range(i):
+                        sample = random.choice(messages)
+                        sample = sample.split(" ")
+                        words.append(random.choice(sample))
+                    speech = " ".join(words)
+                    await message.channel.send(speech)
+
         # SPYBOT FUNCTIONALITY
         if not any(victim in channel for victim in spy_list):
             if message.author.id == client.user.id:
                 pass
-            if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__(
-                    "providentia"):
-                await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
-            elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__(
-                    "bat") and str.lower(message.content).__contains__("providentia"):
-                await message.channel.send(
-                    "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
-        #  WHITELIST FUNCTIONS
-        if whitelisted:
-            if str.lower(message.content).startswith("providentia,"):
-                guild = client.get_guild(message.guild.id)
-                targets = []
-                if str.lower(message.content).__contains__("quantos canais"):
-                    channels_count = 0
-                    for channel in message.guild.channels:
-                        if isinstance(channel, discord.TextChannel):
-                            channels_count += 1
-                    await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
-                elif str.lower(message.content).__contains__("expuls"):
-                    order = str.lower(message.content).split(" ")
-                    for word in order:
-                        if word.startswith("<@"):
-                            targets.append(word)
-                    for victim in targets:
-                        victim = victim.replace("&", "")
-                        victim = victim.replace("<@", "")
-                        victim = victim.replace(">", "")
-                        victim = guild.get_member(int(victim))
-                        try:
-                            await discord.Member.kick(victim, reason="Execução.")
-                            await message.channel.send(f"Operação concluída. {victim} eliminado.")
-                        except Exception as e:
-                            console_log("Erro na expulsão de membros:", e)
-                            if isinstance(e, commands.MissingPermissions):
-                                await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
-                            elif isinstance(e, commands.MissingRequiredArgument):
-                                await message.channel.send(f"Especifique o alvo, senhor.")
-                else:
-                    url = "http://api.giphy.com/v1/gifs/search"
-                    reaction = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        max_tokens=10,
-                        messages=[
+            else:
+                if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__(
+                        "providentia"):
+                    await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
+                elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__(
+                        "bat") and str.lower(message.content).__contains__("providentia"):
+                    await message.channel.send(
+                        "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
 
-                            {"role": "system",
-                             "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
-                            {"role": "user",
-                             "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
-                        ]
 
-                    )
-                    context = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        max_tokens=10,
-                        messages=[
+            #  WHITELIST FUNCTIONS
+            if whitelisted:
+                if str.lower(message.content).startswith("providentia,"):
+                    guild = client.get_guild(message.guild.id)
+                    targets = []
+                    if str.lower(message.content).__contains__("quantos canais"):
+                        channels_count = 0
+                        for channel in message.guild.channels:
+                            if isinstance(channel, discord.TextChannel):
+                                channels_count += 1
+                        await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
+                    elif str.lower(message.content).__contains__("expuls"):
+                        order = str.lower(message.content).split(" ")
+                        for word in order:
+                            if word.startswith("<@"):
+                                targets.append(word)
+                        for victim in targets:
+                            victim = victim.replace("&", "")
+                            victim = victim.replace("<@", "")
+                            victim = victim.replace(">", "")
+                            victim = guild.get_member(int(victim))
+                            try:
+                                await discord.Member.kick(victim, reason="Execução.")
+                                await message.channel.send(f"Operação concluída. {victim} eliminado.")
+                            except Exception as e:
+                                console_log("Erro na expulsão de membros:", e)
+                                if isinstance(e, commands.MissingPermissions):
+                                    await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
+                                elif isinstance(e, commands.MissingRequiredArgument):
+                                    await message.channel.send(f"Especifique o alvo, senhor.")
+                    else:
+                        url = "http://api.giphy.com/v1/gifs/search"
+                        reaction = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            max_tokens=10,
+                            messages=[
 
-                            {"role": "system",
-                             "content": "Narrate this scene happens, but just use three "
-                                        "words. This will be used to search for a gif in Giphy."},
-                            {"role": "user",
-                             "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
-                        ]
+                                {"role": "system",
+                                 "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
+                                {"role": "user",
+                                 "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
+                            ]
 
-                    )
-                    context = context.choices[0].message["content"]
-                    context.replace(" ", "-")
-                    console_log(context)
-                    params = parse.urlencode({
-                        "q": context,
-                        "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
-                        "limit": "5"
-                    })
-                    with request.urlopen("".join((url, "?", params))) as response:
-                        data = json.loads(response.read())
-                        gif_url = data['data'][0]['images']['fixed_height']['url']
-                    await message.channel.send(f"{reaction.choices[0].message['content']}")
-                    await message.channel.send(f"{gif_url}")
+                        )
+                        context = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            max_tokens=10,
+                            messages=[
 
-        elif any(victim in channel for victim in spy_list):
-            author = message.author.name
-            authorimage = message.author.avatar
-            security_base = client.get_channel(1165782255168409720)
-            embed = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
-                                  color=discord.Color.random(),
-                                  description=f"{message.content}")
-            embed.set_thumbnail(url=authorimage)
+                                {"role": "system",
+                                 "content": "Narrate this scene happens, but just use three "
+                                            "words. This will be used to search for a gif in Giphy."},
+                                {"role": "user",
+                                 "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
+                            ]
 
-            await security_base.send(embed=embed)
-        elif channel == "ficha":
-            author = message.author.name
-            authorimage = message.author.avatar
-            security_base = client.get_channel(1165782255168409720)
-            embed = discord.Embed(title=f"Ficha inimiga detectada:",
-                                  color=discord.Color.random(),
-                                  description=f"")
-            embed.set_image(url=message.attachments[0].url)
+                        )
+                        context = context.choices[0].message["content"]
+                        context.replace(" ", "-")
+                        console_log(context)
+                        params = parse.urlencode({
+                            "q": context,
+                            "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                            "limit": "5"
+                        })
+                        with request.urlopen("".join((url, "?", params))) as response:
+                            data = json.loads(response.read())
+                            gif_url = data['data'][0]['images']['fixed_height']['url']
+                        await message.channel.send(f"{reaction.choices[0].message['content']}")
+                        await message.channel.send(f"{gif_url}")
 
-            await security_base.send(embed=embed)
-        else:
-            if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__(
-                    "providên"):
-                await message.channel.send(
-                    "https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
+            elif any(victim in channel for victim in spy_list):
+                console_log("Mensagem inimiga detectada e capturada")
+                author = message.author.name
+                authorimage = message.author.avatar
+                security_base = client.get_channel(1165782255168409720)
+                embed = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
+                                      color=discord.Color.random(),
+                                      description=f"{message.content}")
+                embed.set_thumbnail(url=authorimage)
+
+                await security_base.send(embed=embed)
+            elif channel == "ficha":
+                author = message.author.name
+                authorimage = message.author.avatar
+                security_base = client.get_channel(1165782255168409720)
+                embed = discord.Embed(title=f"Ficha inimiga detectada:",
+                                      color=discord.Color.random(),
+                                      description=f"")
+                embed.set_image(url=message.attachments[0].url)
+
+                await security_base.send(embed=embed)
+            else:
+                if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__(
+                        "providên"):
+                    await message.channel.send(
+                        "https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
 
 
 # EVENTS

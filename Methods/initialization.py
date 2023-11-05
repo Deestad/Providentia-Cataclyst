@@ -42,7 +42,7 @@ def termination():
 
 class Initialization:
     def __init__(self):
-        self.model = 2
+        self.model = 1
         self.bot_token = None
         self.ai_token = None
         self.voice_token = None
@@ -76,13 +76,13 @@ class Initialization:
                     self.bot_token = token_data.get("token")
                 elif self.model == 2:
                     self.bot_token = token_data.get("backup")
-                    self.ai_token = token_data.get("openaitoken")
-                    openai.api_key = self.ai_token
-                    self.voice_token = token_data.get("openaitoken")
-                    self.voice_token = token_data.get("elevenlabsapikey")
-                    elevenlabs.set_api_key(self.ai_token)
+                self.ai_token = token_data.get("openaitoken")
+                openai.api_key = self.ai_token
+                self.voice_token = token_data.get("openaitoken")
+                self.voice_token = token_data.get("elevenlabsapikey")
+                elevenlabs.set_api_key(self.ai_token)
         else:
-            token = input("Inform the token to activate Providentia. \n")
+            token = input("Info rm the token to activate Providentia. \n")
             openai.api_key = input("Inform the OpenAI token. This one is necessary for talking operations.\n")
             elevenlabs_token = input("Insert token for voice application. ElevenLabs. \n")
             try:
