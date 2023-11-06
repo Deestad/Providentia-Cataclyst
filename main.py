@@ -142,6 +142,7 @@ class aclient(discord.Client):
                             if isinstance(channel, discord.TextChannel):
                                 channels_count += 1
                         await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
+
                     elif str.lower(message.content).__contains__("expuls"):
                         order = str.lower(message.content).split(" ")
                         for word in order:
@@ -201,34 +202,34 @@ class aclient(discord.Client):
                             gif_url = data['data'][0]['images']['fixed_height']['url']
                         await message.channel.send(f"{reaction.choices[0].message['content']}")
                         await message.channel.send(f"{gif_url}")
-
-            elif any(victim in channel for victim in spy_list):
-                winsound.PlaySound("Dialogues/enemycomunicationdetected.wav", winsound.SND_FILENAME)
-                console_log("Mensagem inimiga detectada e capturada")
-                author = message.author.name
-                authorimage = message.author.avatar
-                security_base = client.get_channel(1165782255168409720)
-                embed = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
-                                      color=discord.Color.random(),
-                                      description=f"{message.content}")
-                embed.set_thumbnail(url=authorimage)
-
-                await security_base.send(embed=embed)
-            elif channel == "ficha":
-                author = message.author.name
-                authorimage = message.author.avatar
-                security_base = client.get_channel(1165782255168409720)
-                embed = discord.Embed(title=f"Ficha inimiga detectada:",
-                                      color=discord.Color.random(),
-                                      description=f"")
-                embed.set_image(url=message.attachments[0].url)
-
-                await security_base.send(embed=embed)
             else:
                 if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__(
                         "providên"):
                     await message.channel.send(
                         "https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
+
+        elif any(victim in channel for victim in spy_list):
+            winsound.PlaySound("Dialogues/enemycommunicationdetected.wav", winsound.SND_FILENAME)
+            console_log("Mensagem inimiga detectada e capturada")
+            author = message.author.name
+            authorimage = message.author.avatar
+            security_base = client.get_channel(1165782255168409720)
+            embed = discord.Embed(title=f"Comunicação inimiga detectada: Usuário {author}",
+                                  color=discord.Color.random(),
+                                  description=f"{message.content}")
+            embed.set_thumbnail(url=authorimage)
+
+            await security_base.send(embed=embed)
+        elif channel == "ficha":
+            author = message.author.name
+            authorimage = message.author.avatar
+            security_base = client.get_channel(1165782255168409720)
+            embed = discord.Embed(title=f"Ficha inimiga detectada:",
+                                  color=discord.Color.random(),
+                                  description=f"")
+            embed.set_image(url=message.attachments[0].url)
+
+            await security_base.send(embed=embed)
 
 
 # EVENTS
