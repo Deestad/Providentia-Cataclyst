@@ -11,6 +11,7 @@ import time
 import sqlite3
 import os
 import io
+import winsound
 # Third-Party Library Imports
 import peewee
 from peewee import Model, CharField, SqliteDatabase
@@ -56,6 +57,8 @@ class Initialization:
         self.version_info = None
         self.activity = None
 
+        winsound.PlaySound("Dialogues/keywordsofeconomics.wav", winsound.SND_FILENAME)
+        winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
 
         try:
             db.connect()
@@ -69,23 +72,25 @@ class Initialization:
     def load_configuration(self):
         with open(VERSION_INFO_FILE, encoding='utf-8') as version_info_file:
             self.version_info = json.load(version_info_file)
-            get_model = [ [sg.Button('Modelo I: Lygon'),
-                           [sg.Button('Modelo II: Espionagem')]]
+        winsound.PlaySound("Dialogues/choosemodel.wav", winsound.SND_FILENAME)
 
-            ]
-            window = sg.Window('Choose the used model', get_model)
-            while True:
-                event,values = window.read()
+        get_model = [ [sg.Button('Modelo I: Lygon'),
+                       [sg.Button('Modelo II: Espionagem')]]
 
-                if event == "Modelo I: Lygon":
-                    self.model = 1
-                    break
-                elif event == "Modelo II: Espionagem":
-                    self.model = 2
-                    break
-                if event == sg.WIN_CLOSED:
-                    break
-            window.close()
+        ]
+        window = sg.Window('Choose the used model', get_model)
+        while True:
+            event,values = window.read()
+
+            if event == "Modelo I: Lygon":
+                self.model = 1
+                break
+            elif event == "Modelo II: Espionagem":
+                self.model = 2
+                break
+            if event == sg.WIN_CLOSED:
+                break
+        window.close()
 
 
         if os.path.isfile("token.json") and os.access("token.json", os.R_OK):

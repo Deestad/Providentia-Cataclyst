@@ -13,7 +13,7 @@ import os
 import io
 import typing
 import asyncio
-
+import winsound
 # Third-Party Library Imports
 import peewee
 from peewee import Model, CharField, SqliteDatabase
@@ -76,6 +76,7 @@ class aclient(discord.Client):
             await tree.sync()
         await self.change_presence(status=discord.Status.dnd, activity=(
             discord.Activity(type=discord.ActivityType.listening, name=random.choice(lists.atividades_da_providentia))))
+        winsound.PlaySound("Dialogues/connected.wav", winsound.SND_FILENAME)
 
     @tasks.loop(minutes=10)
     async def change_presence_task(self):
@@ -202,6 +203,7 @@ class aclient(discord.Client):
                         await message.channel.send(f"{gif_url}")
 
             elif any(victim in channel for victim in spy_list):
+                winsound.PlaySound("Dialogues/enemycomunicationdetected.wav", winsound.SND_FILENAME)
                 console_log("Mensagem inimiga detectada e capturada")
                 author = message.author.name
                 authorimage = message.author.avatar
