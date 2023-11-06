@@ -829,6 +829,8 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
 
 
 if __name__ == '__main__':
+    winsound.PlaySound("Dialogues/keywordsofeconomics.wav", winsound.SND_FILENAME)
+    winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
     console_log(
         "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     console_log("Initializing...")

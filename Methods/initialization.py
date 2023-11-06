@@ -57,8 +57,7 @@ class Initialization:
         self.version_info = None
         self.activity = None
 
-        winsound.PlaySound("Dialogues/keywordsofeconomics.wav", winsound.SND_FILENAME)
-        winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
+
 
         try:
             db.connect()
