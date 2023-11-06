@@ -99,20 +99,21 @@ class aclient(discord.Client):
         if not any(victim in channel for victim in spy_list):
             if message.author.id != client.user.id:
                 roll = random.randint(1,9)
-                if roll == 15:
+                if roll == 9 or client.user.mentioned_in(message):
                     last_messages = [message async for message in message.channel.history(limit=100)]
                     messages = []
                     words = []
                     for item in last_messages:
                         if len(item.content) > 2:
                             messages.append(item.content)
-                    i = random.randint(4, 8)
+                    i = random.randint(2, 4)
                     print(messages)
                     for n in range(i):
                         sample = random.choice(messages)
                         sample = sample.split(" ")
                         words.append(random.choice(sample))
                     speech = " ".join(words)
+                    speech = str.upper(speech)
                     await message.channel.send(speech)
 
         # SPYBOT FUNCTIONALITY
