@@ -95,10 +95,10 @@ class aclient(discord.Client):
     async def on_message(self, message):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
-        spy_list = ["ações", "aleatorio", "diplomacia"]
+        spy_list = ["ações", "aleatorio", "diplomacia","ficha"]
 
         if not any(victim in channel for victim in spy_list):
-            if message.author.id != client.user.id:
+            if message. author.id != client.user.id:
                 roll = random.randint(1,9)
                 if roll == 9 or client.user.mentioned_in(message):
                     last_messages = [message async for message in message.channel.history(limit=100)]
@@ -830,11 +830,10 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
 
 
 if __name__ == '__main__':
-    winsound.PlaySound("Dialogues/keywordsofeconomics.wav", winsound.SND_FILENAME)
-    winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
     console_log(
         "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     console_log("Initializing...")
+    winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
     try:
         bot_init = Initialization()
         bot_init.load_configuration()
