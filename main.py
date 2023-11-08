@@ -164,7 +164,7 @@ class aclient(discord.Client):
                                     await message.channel.send(f"Especifique o alvo, senhor.")
                     else:
                         url = "http://api.giphy.com/v1/gifs/search"
-                        reaction = openai.ChatCompletion.create(
+                        reaction = openai.completions.create(
                             model="gpt-3.5-turbo",
                             max_tokens=10,
                             messages=[
@@ -176,7 +176,7 @@ class aclient(discord.Client):
                             ]
 
                         )
-                        context = openai.ChatCompletion.create(
+                        context = openai.completions.create(
                             model="gpt-3.5-turbo",
                             max_tokens=10,
                             messages=[
@@ -421,7 +421,7 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
 
     async def thejudgmentofprovidentia(messages):
         dialogue = (" ").join(messages)
-        completion = openai.ChatCompletion.create(
+        completion = openai.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
@@ -481,10 +481,12 @@ async def self(interaction: discord.Interaction, searchsize: int, query: typing.
     whitelisted = Initialization().check_whitelist(interaction.user.id)
 
     async def MentionAmounts(messages, time, query):
-        plt.bar(month_counts.keys(), month_counts.values())
+        amounts = dict(sorted(month_counts.items(), key=lambda item: item[1], reverse=True))
+        colors = ['blue', 'green', 'red', 'purple', 'orange', 'pink', 'cyan', 'magenta', 'yellow', 'brown']
+        plt.bar(month_counts.keys(), month_counts.values(), color=colors)
         plt.xlabel('Mês')
         plt.ylabel(f'Vezes em que {query} foi mencionado')
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=45, fontsize=5)
         plt.title = f"Vezes em que foi dito neste servidor: {query}"
         graph_file = "temp/analysis_graph.jpg"
         plt.savefig(graph_file)
@@ -833,7 +835,7 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
     whitelisted = Initialization().check_whitelist(interaction.user.id)
     if whitelisted:
         await interaction.response.send_message("Gerando...")
-        completion = openai.ChatCompletion.create(
+        completion = openai.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
