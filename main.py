@@ -189,7 +189,7 @@ class aclient(discord.Client):
                             ]
 
                         )
-                        context = context.choices[0].message["content"]
+                        context = context.choices[0].message.content
                         context.replace(" ", "-")
                         console_log(context)
                         params = parse.urlencode({
@@ -200,7 +200,7 @@ class aclient(discord.Client):
                         with request.urlopen("".join((url, "?", params))) as response:
                             data = json.loads(response.read())
                             gif_url = data['data'][0]['images']['fixed_height']['url']
-                        await message.channel.send(f"{reaction.choices[0].message['content']}")
+                        await message.channel.send(f"{reaction.choices[0].message.content}")
                         await message.channel.send(f"{gif_url}")
             else:
                 if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__(
@@ -432,7 +432,7 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                                             f"eu poderia fazer para se defender contra algumas delas. Somos uma nação distante e sem envolvimento, mas desejamos impedi-los. : \n\n'{dialogue}'"}
             ]
         )
-        await security_base.send(completion['choices'][0]['message']['content'])
+        await security_base.send(completion.choices[0].message.content)
 
     if whitelisted:
         enemyinfo = []
@@ -845,10 +845,10 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
             ]
 
         )
-        await sendMessage(completion['choices'][0]['message']['content'])
+        await sendMessage(completion.choices[0].message.content)
         if voice:
             audio = elevenlabs.generate(
-                text=completion['choices'][0]['message']['content'],
+                text=completion.choices[0].message.content,
                 voice="Emily",
                 model="eleven_multilingual_v2"
             )
