@@ -13,6 +13,7 @@ import os
 import io
 import typing
 import asyncio
+import collections
 import winsound
 # Third-Party Library Imports
 import peewee
@@ -95,11 +96,11 @@ class aclient(discord.Client):
     async def on_message(self, message):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
-        spy_list = ["ações", "aleatorio", "diplomacia","ficha"]
+        spy_list = ["ações", "aleatorio", "diplomacia", "ficha"]
 
         if not any(victim in channel for victim in spy_list):
-            if message. author.id != client.user.id:
-                roll = random.randint(1,9)
+            if message.author.id != client.user.id:
+                roll = random.randint(1, 9)
                 if roll == 9 or client.user.mentioned_in(message):
                     last_messages = [message async for message in message.channel.history(limit=100)]
                     messages = []
@@ -129,7 +130,6 @@ class aclient(discord.Client):
                         "bat") and str.lower(message.content).__contains__("providentia"):
                     await message.channel.send(
                         "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
-
 
             #  WHITELIST FUNCTIONS
             if whitelisted:
@@ -476,11 +476,11 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
 
 
 @tree.command(name="statisticalanalysis", description="Faça uma análise estatística de uma área.")
-async def self(interaction: discord.Interaction, searchsize: int, query: str):
-    query = str.lower(query)
+async def self(interaction: discord.Interaction, searchsize: int, query: typing.Optional[str]):
+    query = str.lower(query) if query else None
     whitelisted = Initialization().check_whitelist(interaction.user.id)
 
-    async def BuildGraph(messages, time, query):
+    async def MentionAmounts(messages, time, query):
         plt.bar(month_counts.keys(), month_counts.values())
         plt.xlabel('Mês')
         plt.ylabel(f'Vezes em que {query} foi mencionado')
@@ -490,17 +490,37 @@ async def self(interaction: discord.Interaction, searchsize: int, query: str):
         plt.savefig(graph_file)
         await interaction.channel.send(file=discord.File(graph_file))
 
+    async def MemberRanking(amounts):
+        amounts = dict(sorted(amounts.items(), key=lambda item: item[1], reverse=True))
+        x = list(amounts.keys())
+        y = amounts.values()
+        colors = ['blue', 'green', 'red', 'purple', 'orange', 'pink', 'cyan', 'magenta', 'yellow', 'brown']
+        plt.barh(x,y, color=colors, align='center')
+        plt.xlabel("Contagem de mensagens")
+        plt.ylabel("Usuários")
+        plt.yticks(rotation=45, fontsize=5)
+        most_active_member = max(amounts, key=amounts.get)
+        plt.title(f"{most_active_member} foi o usuário que mais falou neste servidor.")
+        graph_file = "temp/analysis_graph.jpg"
+        plt.savefig(graph_file)
+        await interaction.channel.send(file=discord.File(graph_file))
+
     if whitelisted:
         await interaction.response.send_message("Iniciando análise.")
         analysis_messages = []
         analysis_timestamp = []
+        member_messages = []
         for channel in interaction.guild.channels:
             if isinstance(channel, discord.TextChannel):
                 message_history = [message async for message in channel.history(limit=searchsize)]
                 for message in message_history:
-                    if str.lower(message.content).__contains__(query):
-                        analysis_messages.append(message.content)
-                        analysis_timestamp.append(message.created_at)
+                    if query:
+                        if str.lower(message.content).__contains__(query):
+                            member_messages.append(message.author.name)
+                            analysis_messages.append(message.content)
+                            analysis_timestamp.append(message.created_at)
+                    else:
+                        member_messages.append(message.author.name)
         months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
                   "November", "December"]
 
@@ -508,12 +528,22 @@ async def self(interaction: discord.Interaction, searchsize: int, query: str):
         month_counts = {month: 0 for month in months}
 
         # Loop through analysis_messages and count the months
-        for message, timestamp in zip(analysis_messages, analysis_timestamp):
-            for month in months:
-                if month in timestamp.strftime("%B") and str.lower(message).__contains__(query):
-                    month_counts[month] += 1
+        if query:
+            for message, timestamp in zip(analysis_messages, analysis_timestamp):
+                for month in months:
+                    if month in timestamp.strftime("%B") and str.lower(message).__contains__(query):
+                        month_counts[month] += 1
 
-        await BuildGraph(analysis_messages, analysis_timestamp, query)
+            await MentionAmounts(analysis_messages, analysis_timestamp, query)
+        else:
+            member_messagefreq = {}
+            for item in member_messages:
+                if item in member_messagefreq:
+                    member_messagefreq[item] += 1
+                else:
+                    member_messagefreq[item] = 1
+            await MemberRanking(member_messagefreq)
+
     else:
         await lackPermissions(interaction)
 
