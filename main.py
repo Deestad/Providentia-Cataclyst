@@ -164,7 +164,7 @@ class aclient(discord.Client):
                                     await message.channel.send(f"Especifique o alvo, senhor.")
                     else:
                         url = "http://api.giphy.com/v1/gifs/search"
-                        reaction = openai.completions.create(
+                        reaction = openai.chat.completions.create(
                             model="gpt-3.5-turbo",
                             max_tokens=10,
                             messages=[
@@ -176,7 +176,7 @@ class aclient(discord.Client):
                             ]
 
                         )
-                        context = openai.completions.create(
+                        context = openai.chat.completions.create(
                             model="gpt-3.5-turbo",
                             max_tokens=10,
                             messages=[
@@ -421,7 +421,7 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
 
     async def thejudgmentofprovidentia(messages):
         dialogue = (" ").join(messages)
-        completion = openai.completions.create(
+        completion = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
@@ -432,7 +432,7 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
                                             f"eu poderia fazer para se defender contra algumas delas. Somos uma nação distante e sem envolvimento, mas desejamos impedi-los. : \n\n'{dialogue}'"}
             ]
         )
-        await security_base.send(completion.choices[0].message["content"])
+        await security_base.send(completion['choices'][0]['message']['content'])
 
     if whitelisted:
         enemyinfo = []
@@ -835,7 +835,7 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
     whitelisted = Initialization().check_whitelist(interaction.user.id)
     if whitelisted:
         await interaction.response.send_message("Gerando...")
-        completion = openai.completions.create(
+        completion = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system",
@@ -845,10 +845,10 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
             ]
 
         )
-        await sendMessage(completion.choices[0].message["content"])
+        await sendMessage(completion['choices'][0]['message']['content'])
         if voice:
             audio = elevenlabs.generate(
-                text=completion.choices[0].message["content"],
+                text=completion['choices'][0]['message']['content'],
                 voice="Emily",
                 model="eleven_multilingual_v2"
             )
