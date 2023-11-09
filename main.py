@@ -100,7 +100,10 @@ class aclient(discord.Client):
 
         if not any(victim in channel for victim in spy_list):
             if message.author.id != client.user.id:
-                roll = random.randint(1, 9)
+                if "1150898662982041641" not in str(message.guild.id):
+                    roll = random.randint(1, 9)
+                else:
+                    roll = None
                 if roll == 9 or client.user.mentioned_in(message):
                     last_messages = [message async for message in message.channel.history(limit=100)]
                     messages = []
