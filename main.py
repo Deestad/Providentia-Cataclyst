@@ -105,21 +105,49 @@ class aclient(discord.Client):
                 else:
                     roll = None
                 if roll == 9 or client.user.mentioned_in(message):
-                    last_messages = [message async for message in message.channel.history(limit=100)]
-                    messages = []
-                    words = []
-                    for item in last_messages:
-                        if len(item.content) > 2:
-                            messages.append(item.content)
-                    i = random.randint(2, 4)
-                    print(messages)
-                    for n in range(i):
-                        sample = random.choice(messages)
-                        sample = sample.split(" ")
-                        words.append(random.choice(sample))
-                    speech = " ".join(words)
-                    speech = str.upper(speech)
-                    await message.channel.send(speech)
+                    roll_type = random.randint(1, 2)
+                    if roll_type == 1:
+                        last_messages = [message async for message in message.channel.history(limit=100)]
+                        messages = []
+                        words = []
+                        for item in last_messages:
+                            if len(item.content) > 2:
+                                messages.append(item.content)
+                        i = random.randint(2, 4)
+                        for n in range(i):
+                            sample = random.choice(messages)
+                            sample = sample.split(" ")
+                            words.append(random.choice(sample))
+                        speech = " ".join(words)
+                        speech = str.upper(speech)
+                        await message.channel.send(speech)
+                    else:
+                        response = openai.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            max_tokens=10,
+                            messages=[
+
+                                {"role": "system",
+                                 "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
+                                {"role": "user",
+                                 "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
+                            ]
+
+                        )
+                        response = openai.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            max_tokens=10,
+                            messages=[
+
+                                {"role": "system",
+                                 "content": "Você é uma usuária do Discord."},
+                                {"role": "user",
+                                 "content": f"Responda a essa mensagem como se fosse um usuário normal no chat. Seja breve e curta. MENSAGEM: {message.content}"}
+                            ]
+
+                        )
+                        await message.channel.send(f"{str.upper(response.choices[0].message.content)}")
+
 
         # SPYBOT FUNCTIONALITY
         if not any(victim in channel for victim in spy_list):
