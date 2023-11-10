@@ -101,10 +101,10 @@ class aclient(discord.Client):
         if not any(victim in channel for victim in spy_list):
             if message.author.id != client.user.id:
                 if "1150898662982041641" not in str(message.guild.id):
-                    roll = random.randint(1, 9)
+                    roll = random.randint(1, 5)
                 else:
                     roll = None
-                if roll == 9 or client.user.mentioned_in(message):
+                if roll == 5 or client.user.mentioned_in(message):
                     roll_type = random.randint(1, 2)
                     if roll_type == 1:
                         last_messages = [message async for message in message.channel.history(limit=100)]
@@ -128,21 +128,9 @@ class aclient(discord.Client):
                             messages=[
 
                                 {"role": "system",
-                                 "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
-                                {"role": "user",
-                                 "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
-                            ]
-
-                        )
-                        response = openai.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            max_tokens=10,
-                            messages=[
-
-                                {"role": "system",
                                  "content": "Você é uma usuária do Discord."},
                                 {"role": "user",
-                                 "content": f"Responda a essa mensagem como se fosse um usuário normal no chat. Seja breve e curta. MENSAGEM: {message.content}"}
+                                 "content": f"Responda a essa mensagem como se fosse um usuário normal no chat. Seja breve e curta e não use acentos e nem pontuação. MENSAGEM: {message.content}"}
                             ]
 
                         )
