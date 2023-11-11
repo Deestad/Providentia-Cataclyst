@@ -97,13 +97,86 @@ class aclient(discord.Client):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
         spy_list = ["ações", "aleatorio", "diplomacia", "ficha"]
+        userbehavior_list = ["porto", "praça-do-chodo", "geral", "parlamento"]
 
-        if not any(victim in channel for victim in spy_list):
-            if message.author.id != client.user.id:
-                if "1150898662982041641" not in str(message.guild.id):
-                    roll = random.randint(1, 5)
+        #  WHITELIST FUNCTIONS
+        if whitelisted:
+            if str.lower(message.content).startswith("providentia,"):
+                guild = client.get_guild(message.guild.id)
+                targets = []
+                if str.lower(message.content).__contains__("quantos canais"):
+                    channels_count = 0
+                    for channel in message.guild.channels:
+                        if isinstance(channel, discord.TextChannel):
+                            channels_count += 1
+                    await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
+
+                elif str.lower(message.content).__contains__("expuls"):
+                    order = str.lower(message.content).split(" ")
+                    for word in order:
+                        if word.startswith("<@"):
+                            targets.append(word)
+                    for victim in targets:
+                        victim = victim.replace("&", "")
+                        victim = victim.replace("<@", "")
+                        victim = victim.replace(">", "")
+                        victim = guild.get_member(int(victim))
+                        try:
+                            await discord.Member.kick(victim, reason="Execução.")
+                            await message.channel.send(f"Operação concluída. {victim} eliminado.")
+                        except Exception as e:
+                            console_log("Erro na expulsão de membros:", e)
+                            if isinstance(e, commands.MissingPermissions):
+                                await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
+                            elif isinstance(e, commands.MissingRequiredArgument):
+                                await message.channel.send(f"Especifique o alvo, senhor.")
                 else:
-                    roll = None
+                    url = "http://api.giphy.com/v1/gifs/search"
+                    reaction = openai.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        max_tokens=10,
+                        messages=[
+
+                            {"role": "system",
+                             "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
+                            {"role": "user",
+                             "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
+                        ]
+
+                    )
+                    context = openai.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        max_tokens=10,
+                        messages=[
+
+                            {"role": "system",
+                             "content": "Narrate this scene happens, but just use three "
+                                        "words. This will be used to search for a gif in Giphy."},
+                            {"role": "user",
+                             "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
+                        ]
+
+                    )
+                    context = context.choices[0].message.content
+                    context.replace(" ", "-")
+                    console_log(context)
+                    params = parse.urlencode({
+                        "q": context,
+                        "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                        "limit": "5"
+                    })
+                    with request.urlopen("".join((url, "?", params))) as response:
+                        data = json.loads(response.read())
+                        gif_url = data['data'][0]['images']['fixed_height']['url']
+                    await message.channel.send(f"{reaction.choices[0].message.content}")
+                    await message.channel.send(f"{gif_url}")
+
+        if not any(victim in channel for victim in
+                   spy_list) and  "1150898662982041641" not in str(
+            message.guild.id) and whitelisted or client.user.mentioned_in(
+            message):
+            if message.author.id != client.user.id:
+                roll = random.randint(1, 5)
                 if roll == 5 or client.user.mentioned_in(message):
                     roll_type = random.randint(1, 2)
                     if roll_type == 1:
@@ -117,7 +190,10 @@ class aclient(discord.Client):
                         for n in range(i):
                             sample = random.choice(messages)
                             sample = sample.split(" ")
-                            words.append(random.choice(sample))
+                            chosen_word = random.choice(sample)
+                            if chosen_word.__contains__("https"):
+                                chosen_word = " ".join("\n\n")
+                            words.append(chosen_word)
                         speech = " ".join(words)
                         speech = str.upper(speech)
                         await message.channel.send(speech)
@@ -134,100 +210,10 @@ class aclient(discord.Client):
                             ]
 
                         )
-                        await message.channel.send(f"{str.upper(response.choices[0].message.content)}")
-
+                        await message.channel.send(f"{str.capitalize(response.choices[0].message.content)}")
 
         # SPYBOT FUNCTIONALITY
-        if not any(victim in channel for victim in spy_list):
-            if message.author.id == client.user.id:
-                pass
-            else:
-                if str.lower(message.content).__contains__("atir") and str.lower(message.content).__contains__(
-                        "providentia"):
-                    await message.channel.send("https://media.tenor.com/Jw8I___MCdQAAAAC/matrix-dodge.gif")
-                elif str.lower(message.content).__contains__("atac") or str.lower(message.content).__contains__(
-                        "bat") and str.lower(message.content).__contains__("providentia"):
-                    await message.channel.send(
-                        "https://64.media.tumblr.com/35077a06fa6fd1401500b802d6deee9f/tumblr_om8b32BOzF1rrwrx4o1_500.gif")
-
-            #  WHITELIST FUNCTIONS
-            if whitelisted:
-                if str.lower(message.content).startswith("providentia,"):
-                    guild = client.get_guild(message.guild.id)
-                    targets = []
-                    if str.lower(message.content).__contains__("quantos canais"):
-                        channels_count = 0
-                        for channel in message.guild.channels:
-                            if isinstance(channel, discord.TextChannel):
-                                channels_count += 1
-                        await message.channel.send(f"Este servidor tem {channels_count}, senhor.")
-
-                    elif str.lower(message.content).__contains__("expuls"):
-                        order = str.lower(message.content).split(" ")
-                        for word in order:
-                            if word.startswith("<@"):
-                                targets.append(word)
-                        for victim in targets:
-                            victim = victim.replace("&", "")
-                            victim = victim.replace("<@", "")
-                            victim = victim.replace(">", "")
-                            victim = guild.get_member(int(victim))
-                            try:
-                                await discord.Member.kick(victim, reason="Execução.")
-                                await message.channel.send(f"Operação concluída. {victim} eliminado.")
-                            except Exception as e:
-                                console_log("Erro na expulsão de membros:", e)
-                                if isinstance(e, commands.MissingPermissions):
-                                    await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
-                                elif isinstance(e, commands.MissingRequiredArgument):
-                                    await message.channel.send(f"Especifique o alvo, senhor.")
-                    else:
-                        url = "http://api.giphy.com/v1/gifs/search"
-                        reaction = openai.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            max_tokens=10,
-                            messages=[
-
-                                {"role": "system",
-                                 "content": "Você é uma automata de destruição. Responda apenas com uma a três palavras a seguinte ordem dada pelo imperador."},
-                                {"role": "user",
-                                 "content": f"Faça uma reação como resposta à ordem dada pelo imperador em duas, no máximo três palavras: {message.content}"}
-                            ]
-
-                        )
-                        context = openai.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            max_tokens=10,
-                            messages=[
-
-                                {"role": "system",
-                                 "content": "Narrate this scene happens, but just use three "
-                                            "words. This will be used to search for a gif in Giphy."},
-                                {"role": "user",
-                                 "content": f"Narrate in three words what happens visually in the scene. Don't say emotions, just literally what happens: {message.content}"}
-                            ]
-
-                        )
-                        context = context.choices[0].message.content
-                        context.replace(" ", "-")
-                        console_log(context)
-                        params = parse.urlencode({
-                            "q": context,
-                            "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
-                            "limit": "5"
-                        })
-                        with request.urlopen("".join((url, "?", params))) as response:
-                            data = json.loads(response.read())
-                            gif_url = data['data'][0]['images']['fixed_height']['url']
-                        await message.channel.send(f"{reaction.choices[0].message.content}")
-                        await message.channel.send(f"{gif_url}")
-            else:
-                if str.lower(message.content).__contains__("providen") or str.lower(message.content).__contains__(
-                        "providên"):
-                    await message.channel.send(
-                        "https://i.pinimg.com/originals/3f/26/ac/3f26acb731d8e3e7095967ab6a66f570.gif")
-
-        elif any(victim in channel for victim in spy_list):
+        if any(victim in channel for victim in spy_list):
             winsound.PlaySound("Dialogues/enemycommunicationdetected.wav", winsound.SND_FILENAME)
             console_log("Mensagem inimiga detectada e capturada")
             author = message.author.name
@@ -499,6 +485,7 @@ async def self(interaction: discord.Interaction, searchsize: int, query: typing.
     query = str.lower(query) if query else None
     whitelisted = Initialization().check_whitelist(interaction.user.id)
 
+
     async def MentionAmounts(messages, time, query):
         amounts = dict(sorted(month_counts.items(), key=lambda item: item[1], reverse=True))
         colors = ['blue', 'green', 'red', 'purple', 'orange', 'pink', 'cyan', 'magenta', 'yellow', 'brown']
@@ -516,7 +503,7 @@ async def self(interaction: discord.Interaction, searchsize: int, query: typing.
         x = list(amounts.keys())
         y = amounts.values()
         colors = ['blue', 'green', 'red', 'purple', 'orange', 'pink', 'cyan', 'magenta', 'yellow', 'brown']
-        plt.barh(x,y, color=colors, align='center')
+        plt.barh(x, y, color=colors, align='center')
         plt.xlabel("Contagem de mensagens")
         plt.ylabel("Usuários")
         plt.yticks(rotation=45, fontsize=5)
@@ -580,17 +567,17 @@ async def self(interaction: discord.Interaction, userid: str, add_remove: str):
         try:
             if add_remove == 'add':
                 try:
-                    user_exists = Whitelist.get(Whitelist.userid == userid)
-                    if not user_exists:
-                        user_entry = Whitelist.create(userid=userid)
-                        user_entry.save()
-                        console_log(f"Usuário {userid} adicionado na Whitelist.")
-                        embed = default_embed(f"Sucesso.", f"<@{userid}> adicionado na Whitelist.")
-                        await interaction.response.send_message(embed=embed)
-                    else:
-                        embed = default_embed(f"Não pude usar este comando.",
-                                              f"Usuário já está na Whitelist.")
-                        await interaction.response.send_message(embed=embed)
+                    Whitelist.get(Whitelist.userid == userid)
+                    embed = default_embed(f"Não pude usar este comando.",
+                                          f"Usuário já está na Whitelist.")
+                    await interaction.response.send_message(embed=embed)
+                except Whitelist.DoesNotExist:
+                    user_entry = Whitelist.create(userid=userid)
+                    user_entry.save()
+                    console_log(f"Usuário {userid} adicionado na Whitelist.")
+                    embed = default_embed(f"Sucesso.", f"<@{userid}> adicionado na Whitelist.")
+                    await interaction.response.send_message(embed=embed)
+
                 except ValueError:
                     embed = default_embed(f"Valor inválido.", f"Insira um id inteiro.")
                     await interaction.response.send_message(embed=embed)
