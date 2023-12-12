@@ -106,9 +106,8 @@ class Initialization:
                     self.bot_token = token_data.get("backup")
                 self.ai_token = token_data.get("openaitoken")
                 openai.api_key = self.ai_token
-                self.voice_token = token_data.get("openaitoken")
                 self.voice_token = token_data.get("elevenlabsapikey")
-                elevenlabs.set_api_key(self.ai_token)
+                elevenlabs.set_api_key(self.voice_token)
         else:
             token = input("Info rm the token to activate Providentia. \n")
             openai.api_key = input("Inform the OpenAI token. This one is necessary for talking operations.\n")
