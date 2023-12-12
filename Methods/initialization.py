@@ -11,8 +11,12 @@ import time
 import sqlite3
 import os
 import io
-import winsound
-# Third-Party Library Imports
+if os.name == 'nt':
+    try:
+        import winsound
+    except Exception as e:
+        print(e)
+        pass# Third-Party Library Imports
 import peewee
 from peewee import Model, CharField, SqliteDatabase
 import openai
@@ -71,7 +75,7 @@ class Initialization:
     def load_configuration(self):
         with open(VERSION_INFO_FILE, encoding='utf-8') as version_info_file:
             self.version_info = json.load(version_info_file)
-        winsound.PlaySound("Dialogues/choosemodel.wav", winsound.SND_FILENAME)
+        if os.name == 'nt': winsound.PlaySound("Dialogues/choosemodel.wav", winsound.SND_FILENAME)
 
         get_model = [ [sg.Button('Modelo I: Lygon'),
                        [sg.Button('Modelo II: Espionagem')]]

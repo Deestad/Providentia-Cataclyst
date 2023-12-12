@@ -14,7 +14,13 @@ import io
 import typing
 import asyncio
 import collections
-import winsound
+
+if os.name == 'nt':
+    try:
+        import winsound
+    except Exception as e:
+        print(e)
+        pass
 # Third-Party Library Imports
 import peewee
 from peewee import Model, CharField, SqliteDatabase
@@ -77,7 +83,7 @@ class aclient(discord.Client):
             await tree.sync()
         await self.change_presence(status=discord.Status.dnd, activity=(
             discord.Activity(type=discord.ActivityType.listening, name=random.choice(lists.atividades_da_providentia))))
-        winsound.PlaySound("Dialogues/connected.wav", winsound.SND_FILENAME)
+        if os.name == 'nt': winsound.PlaySound("Dialogues/connected.wav", winsound.SND_FILENAME)
 
     @tasks.loop(minutes=10)
     async def change_presence_task(self):
@@ -172,7 +178,7 @@ class aclient(discord.Client):
                     await message.channel.send(f"{gif_url}")
 
         if not any(victim in channel for victim in
-                   spy_list) and  "1150898662982041641" not in str(
+                   spy_list) and "1150898662982041641" not in str(
             message.guild.id) and whitelisted or client.user.mentioned_in(
             message):
             if message.author.id != client.user.id:
@@ -214,7 +220,7 @@ class aclient(discord.Client):
 
         # SPYBOT FUNCTIONALITY
         if any(victim in channel for victim in spy_list):
-            winsound.PlaySound("Dialogues/enemycommunicationdetected.wav", winsound.SND_FILENAME)
+            if os.name == 'nt': winsound.PlaySound("Dialogues/enemycommunicationdetected.wav", winsound.SND_FILENAME)
             console_log("Mensagem inimiga detectada e capturada")
             author = message.author.name
             authorimage = message.author.avatar
@@ -484,7 +490,6 @@ async def self(interaction: discord.Interaction, searchquery: str, searchsize: i
 async def self(interaction: discord.Interaction, searchsize: int, query: typing.Optional[str]):
     query = str.lower(query) if query else None
     whitelisted = Initialization().check_whitelist(interaction.user.id)
-
 
     async def MentionAmounts(messages, time, query):
         amounts = dict(sorted(month_counts.items(), key=lambda item: item[1], reverse=True))
@@ -871,7 +876,7 @@ if __name__ == '__main__':
     console_log(
         "The key words of economics are urbanization, industrialization, centralization, efficiency, quantity, speed.")
     console_log("Initializing...")
-    winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
+    if os.name == 'nt': winsound.PlaySound("Dialogues/initializing.wav", winsound.SND_FILENAME)
     try:
         bot_init = Initialization()
         bot_init.load_configuration()
