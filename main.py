@@ -840,7 +840,7 @@ async def self(interaction: discord.Interaction, dialogue: str, voice: typing.Op
                               color=15277667,
                               description=f"Providentia responde: \n\n {message}",
                               )
-        embed.set_image(url="https://i.pinimg.com/564x/41/8c/d7/418cd7357407b154ad6d8df021276bc0.jpg")
+        embed.set_image(url="https://i.pinimg.com/564x/2a/31/6b/2a316bc1858152eea721c718378eebda.jpg")
         await interaction.edit_original_response(embed=embed)
 
     whitelisted = Initialization().check_whitelist(interaction.user.id)
