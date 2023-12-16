@@ -15,6 +15,8 @@ import typing
 import asyncio
 import collections
 
+from wikipedia import DisambiguationError
+
 if os.name == 'nt':
     try:
         import winsound
@@ -334,6 +336,64 @@ async def self(interaction: discord.Interaction, searchquery: str):
                 message = ("Desculpe, não pude encontrar o que você está procurando.")
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
+
+@tree.command(name="presentear", description="Dê um presente de natal para um amigo!")
+async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.User):
+        if alvo:
+            default_embed = Initialization().defaultembed
+            embedVar = default_embed(f"{interaction.user.display_name} acabou de presentar {alvo.display_name}! O que será o presente misterioso? 😨",f"Tem uma nota escrito **'{mensagem}'**")
+            embedVar.set_thumbnail(url=alvo.avatar)
+            await interaction.response.send_message(embed=embedVar)
+            url = "http://api.giphy.com/v1/gifs/search"
+            params = parse.urlencode({
+                "q": "christmas",
+                "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                "limit": "11"
+            })
+
+            with request.urlopen("".join((url, "?", params))) as response:
+                data = json.loads(response.read())
+                try:
+                    gif_choice = random.randint(1, 10)
+                    gif_url = data['data'][gif_choice]['images']['fixed_height']['url']
+                except IndexError:
+                    gif_url = data['data'][0]['images']['fixed_height']['url']
+            await interaction.channel.send(f"{gif_url}")
+            wikipedia.set_lang("pt")
+            while True:
+                try:
+                    item = wikipedia.random(1)
+                    presente = wikipedia.summary(item)
+                    break
+                except wikipedia.DisambiguationError:
+                    item = wikipedia.random(1)
+                    presente = wikipedia.summary(item)
+                    continue
+            try:
+                images = wikipedia.page(item).images
+                result_image = [image for image in images if image.__contains__(f"{presente.split(' ')[0]}") and '.svg' not in image][0]
+            except IndexError:
+                params = parse.urlencode({
+                    "q": f"{presente.split(' ')[0]}",
+                    "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                    "limit": "11"
+                })
+                url = "http://api.giphy.com/v1/gifs/search"
+                with request.urlopen("".join((url, "?", params))) as response:
+                    data = json.loads(response.read())
+                    try:
+                        gif_choice = random.randint(1, 10)
+                        result_image = data['data'][gif_choice]['images']['fixed_height']['url']
+                    except IndexError:
+                        result_image = data['data'][0]['images']['fixed_height']['url']
+
+            embedVar = default_embed(f"Uau {alvo.display_name} É um {item} 🤯! Que presentasso!", presente)
+            embedVar.add_field(name="", value=f"<@{alvo.id}>! E aí, gostou?")
+            embedVar.set_image(url=result_image)
+            await interaction.channel.send(embed=embedVar)
+
+
+
 
 
 @tree.command(name="arithmetic",
