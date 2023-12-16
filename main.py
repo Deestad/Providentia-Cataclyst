@@ -107,7 +107,7 @@ class aclient(discord.Client):
         spy_list = ["ações", "aleatorio", "diplomacia", "ficha"]
         userbehavior_list = ["porto", "praça-do-chodo", "geral", "parlamento"]
 
-        #  WHITELIST FUNCTIONS
+        #  WHITELIST FUNCTIONSx'
         if whitelisted:
             if str.lower(message.content).startswith("providentia,"):
                 guild = client.get_guild(message.guild.id)
