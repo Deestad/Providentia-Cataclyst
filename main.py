@@ -346,7 +346,7 @@ async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.Us
             await interaction.response.send_message(embed=embedVar)
             url = "http://api.giphy.com/v1/gifs/search"
             params = parse.urlencode({
-                "q": "christmas",
+                "q": "lootbox",
                 "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
                 "limit": "11"
             })
@@ -371,7 +371,7 @@ async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.Us
                     continue
             try:
                 images = wikipedia.page(item).images
-                result_image = [image for image in images if image.__contains__(f"{presente.split(' ')[0]}") and '.svg' not in image][0]
+                result_image = [image for image in images if str.lower(image).__contains__(f"{presente.split(' ')[0]}") and '.svg' not in image][0]
             except IndexError:
                 params = parse.urlencode({
                     "q": f"{presente.split(' ')[0]}",
@@ -386,8 +386,11 @@ async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.Us
                         result_image = data['data'][gif_choice]['images']['fixed_height']['url']
                     except IndexError:
                         result_image = data['data'][0]['images']['fixed_height']['url']
+                        if not result_image:
+                            result_image = "https://static.wikia.nocookie.net/sd-reborn/images/3/31/Obama.png/revision/latest/thumbnail/width/360/height/360?cb=20221021132625"
 
-            embedVar = default_embed(f"Uau {alvo.display_name} É um {item} 🤯! Que presentasso!", presente)
+            sumario = presente[:256]
+            embedVar = default_embed(f"Uau, {alvo.display_name}! É um {item} 🤯! Que presentasso!", f"{sumario}(...)")
             embedVar.add_field(name="", value=f"<@{alvo.id}>! E aí, gostou?")
             embedVar.set_image(url=result_image)
             await interaction.channel.send(embed=embedVar)
