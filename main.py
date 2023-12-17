@@ -395,6 +395,64 @@ async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.Us
             embedVar.set_image(url=result_image)
             await interaction.channel.send(embed=embedVar)
 
+@tree.command(name="gift", description="Give a Christmas present to a friend!")
+async def self(interaction: discord.Interaction, message: str, target: discord.User):
+    if target:
+        default_embed = Initialization().defaultembed
+        embedVar = default_embed(f"{interaction.user.display_name} just gave a present to {target.display_name}! What will the mysterious gift be? 😨", f"There's a note that says **'{message}'**")
+        embedVar.set_thumbnail(url=target.avatar)
+        await interaction.response.send_message(embed=embedVar)
+        url = "http://api.giphy.com/v1/gifs/search"
+        params = parse.urlencode({
+            "q": "lootbox",
+            "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+            "limit": "11"
+        })
+
+        with request.urlopen("".join((url, "?", params))) as response:
+            data = json.loads(response.read())
+            try:
+                gif_choice = random.randint(1, 10)
+                gif_url = data['data'][gif_choice]['images']['fixed_height']['url']
+            except IndexError:
+                gif_url = data['data'][0]['images']['fixed_height']['url']
+        await interaction.channel.send(f"{gif_url}")
+        wikipedia.set_lang("en")
+        while True:
+            try:
+                item = wikipedia.random(1)
+                gift = wikipedia.summary(item)
+                break
+            except wikipedia.DisambiguationError:
+                item = wikipedia.random(1)
+                gift = wikipedia.summary(item)
+                continue
+        try:
+            images = wikipedia.page(item).images
+            result_image = [image for image in images if str.lower(image).__contains__(f"{gift.split(' ')[0]}") and '.svg' not in image][0]
+        except IndexError:
+            params = parse.urlencode({
+                "q": f"{gift.split(' ')[0]}",
+                "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+                "limit": "11"
+            })
+            url = "http://api.giphy.com/v1/gifs/search"
+            with request.urlopen("".join((url, "?", params))) as response:
+                data = json.loads(response.read())
+                try:
+                    gif_choice = random.randint(1, 10)
+                    result_image = data['data'][gif_choice]['images']['fixed_height']['url']
+                except IndexError:
+                    result_image = data['data'][0]['images']['fixed_height']['url']
+                    if not result_image:
+                        result_image = "https://static.wikia.nocookie.net/sd-reborn/images/3/31/Obama.png/revision/latest/thumbnail/width/360/height/360?cb=20221021132625"
+
+        summary = gift[:256]
+        embedVar = default_embed(f"Wow, {target.display_name}! It's a {item} 🤯! What an amazing gift!", f"{summary}(...)")
+        embedVar.add_field(name="", value=f"<@{target.id}>! So, did you like it?")
+        embedVar.set_image(url=result_image)
+        await interaction.channel.send(embed=embedVar)
+
 
 
 
