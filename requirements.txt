@@ -8,3 +8,6 @@ openai
 elevenlabs
 peewee
 PySimpleGUI
+deepface
+tensorflow
+translate

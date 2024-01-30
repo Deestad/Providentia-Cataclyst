@@ -41,8 +41,10 @@ from requests import get
 from sympy import *
 import statistics
 import matplotlib.pyplot as plt
+from deepface import DeepFace
 from wordcloud import WordCloud
 from urllib import parse, request
+from translate import Translator
 
 # Project-Specific Imports
 from comandos import *
@@ -184,7 +186,7 @@ class aclient(discord.Client):
             message.guild.id) and whitelisted or client.user.mentioned_in(
             message):
             if message.author.id != client.user.id:
-                roll = random.randint(1, 5)
+                roll = random.randint(1, 10)
                 if roll == 5 or client.user.mentioned_in(message):
                     roll_type = random.randint(1, 2)
                     if roll_type == 1:
@@ -337,69 +339,76 @@ async def self(interaction: discord.Interaction, searchquery: str):
                 embedVar = default_embed(f"Você quer aprender sobre {searchquery}?", message)
                 await interaction.edit_original_response(embed=embedVar)
 
+
 @tree.command(name="presentear", description="Dê um presente de natal para um amigo!")
 async def self(interaction: discord.Interaction, mensagem: str, alvo: discord.User):
-        if alvo:
-            default_embed = Initialization().defaultembed
-            embedVar = default_embed(f"{interaction.user.display_name} acabou de presentar {alvo.display_name}! O que será o presente misterioso? 😨",f"Tem uma nota escrito **'{mensagem}'**")
-            embedVar.set_thumbnail(url=alvo.avatar)
-            await interaction.response.send_message(embed=embedVar)
-            url = "http://api.giphy.com/v1/gifs/search"
+    if alvo:
+        default_embed = Initialization().defaultembed
+        embedVar = default_embed(
+            f"{interaction.user.display_name} acabou de presentar {alvo.display_name}! O que será o presente misterioso? 😨",
+            f"Tem uma nota escrito **'{mensagem}'**")
+        embedVar.set_thumbnail(url=alvo.avatar)
+        await interaction.response.send_message(embed=embedVar)
+        url = "http://api.giphy.com/v1/gifs/search"
+        params = parse.urlencode({
+            "q": "lootbox",
+            "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
+            "limit": "11"
+        })
+
+        with request.urlopen("".join((url, "?", params))) as response:
+            data = json.loads(response.read())
+            try:
+                gif_choice = random.randint(1, 10)
+                gif_url = data['data'][gif_choice]['images']['fixed_height']['url']
+            except IndexError:
+                gif_url = data['data'][0]['images']['fixed_height']['url']
+        await interaction.channel.send(f"{gif_url}")
+        wikipedia.set_lang("pt")
+        while True:
+            try:
+                item = wikipedia.random(1)
+                presente = wikipedia.summary(item)
+                break
+            except wikipedia.DisambiguationError:
+                item = wikipedia.random(1)
+                presente = wikipedia.summary(item)
+                continue
+        try:
+            images = wikipedia.page(item).images
+            result_image = [image for image in images if
+                            str.lower(image).__contains__(f"{presente.split(' ')[0]}") and '.svg' not in image][0]
+        except IndexError:
             params = parse.urlencode({
-                "q": "lootbox",
+                "q": f"{presente.split(' ')[0]}",
                 "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
                 "limit": "11"
             })
-
+            url = "http://api.giphy.com/v1/gifs/search"
             with request.urlopen("".join((url, "?", params))) as response:
                 data = json.loads(response.read())
                 try:
                     gif_choice = random.randint(1, 10)
-                    gif_url = data['data'][gif_choice]['images']['fixed_height']['url']
+                    result_image = data['data'][gif_choice]['images']['fixed_height']['url']
                 except IndexError:
-                    gif_url = data['data'][0]['images']['fixed_height']['url']
-            await interaction.channel.send(f"{gif_url}")
-            wikipedia.set_lang("pt")
-            while True:
-                try:
-                    item = wikipedia.random(1)
-                    presente = wikipedia.summary(item)
-                    break
-                except wikipedia.DisambiguationError:
-                    item = wikipedia.random(1)
-                    presente = wikipedia.summary(item)
-                    continue
-            try:
-                images = wikipedia.page(item).images
-                result_image = [image for image in images if str.lower(image).__contains__(f"{presente.split(' ')[0]}") and '.svg' not in image][0]
-            except IndexError:
-                params = parse.urlencode({
-                    "q": f"{presente.split(' ')[0]}",
-                    "api_key": "8AkWlssazxQ5ohXq3MlOBo2FLPkFDexa",
-                    "limit": "11"
-                })
-                url = "http://api.giphy.com/v1/gifs/search"
-                with request.urlopen("".join((url, "?", params))) as response:
-                    data = json.loads(response.read())
-                    try:
-                        gif_choice = random.randint(1, 10)
-                        result_image = data['data'][gif_choice]['images']['fixed_height']['url']
-                    except IndexError:
-                        result_image = data['data'][0]['images']['fixed_height']['url']
-                        if not result_image:
-                            result_image = "https://static.wikia.nocookie.net/sd-reborn/images/3/31/Obama.png/revision/latest/thumbnail/width/360/height/360?cb=20221021132625"
+                    result_image = data['data'][0]['images']['fixed_height']['url']
+                    if not result_image:
+                        result_image = "https://static.wikia.nocookie.net/sd-reborn/images/3/31/Obama.png/revision/latest/thumbnail/width/360/height/360?cb=20221021132625"
 
-            sumario = presente[:256]
-            embedVar = default_embed(f"Uau, {alvo.display_name}! É um {item} 🤯! Que presentasso!", f"{sumario}(...)")
-            embedVar.add_field(name="", value=f"<@{alvo.id}>! E aí, gostou?")
-            embedVar.set_image(url=result_image)
-            await interaction.channel.send(embed=embedVar)
+        sumario = presente[:256]
+        embedVar = default_embed(f"Uau, {alvo.display_name}! É um {item} 🤯! Que presentasso!", f"{sumario}(...)")
+        embedVar.add_field(name="", value=f"<@{alvo.id}>! E aí, gostou?")
+        embedVar.set_image(url=result_image)
+        await interaction.channel.send(embed=embedVar)
+
 
 @tree.command(name="gift", description="Give a Christmas present to a friend!")
 async def self(interaction: discord.Interaction, message: str, target: discord.User):
     if target:
         default_embed = Initialization().defaultembed
-        embedVar = default_embed(f"{interaction.user.display_name} just gave a present to {target.display_name}! What will the mysterious gift be? 😨", f"There's a note that says **'{message}'**")
+        embedVar = default_embed(
+            f"{interaction.user.display_name} just gave a present to {target.display_name}! What will the mysterious gift be? 😨",
+            f"There's a note that says **'{message}'**")
         embedVar.set_thumbnail(url=target.avatar)
         await interaction.response.send_message(embed=embedVar)
         url = "http://api.giphy.com/v1/gifs/search"
@@ -429,7 +438,8 @@ async def self(interaction: discord.Interaction, message: str, target: discord.U
                 continue
         try:
             images = wikipedia.page(item).images
-            result_image = [image for image in images if str.lower(image).__contains__(f"{gift.split(' ')[0]}") and '.svg' not in image][0]
+            result_image = [image for image in images if
+                            str.lower(image).__contains__(f"{gift.split(' ')[0]}") and '.svg' not in image][0]
         except IndexError:
             params = parse.urlencode({
                 "q": f"{gift.split(' ')[0]}",
@@ -448,15 +458,43 @@ async def self(interaction: discord.Interaction, message: str, target: discord.U
                         result_image = "https://static.wikia.nocookie.net/sd-reborn/images/3/31/Obama.png/revision/latest/thumbnail/width/360/height/360?cb=20221021132625"
 
         summary = gift[:256]
-        embedVar = default_embed(f"Wow, {target.display_name}! It's a {item} 🤯! What an amazing gift!", f"{summary}(...)")
+        embedVar = default_embed(f"Wow, {target.display_name}! It's a {item} 🤯! What an amazing gift!",
+                                 f"{summary}(...)")
         embedVar.add_field(name="", value=f"<@{target.id}>! So, did you like it?")
         embedVar.set_image(url=result_image)
         await interaction.channel.send(embed=embedVar)
 
 
+@tree.command(name="facialanalysis",
+              description="Análise facial através de Deepface e Tensorflow.",
+              )
+async def self(interaction: discord.Interaction):
+    whitelisted = Initialization().check_whitelist(interaction.user.id)
+    default_embed = Initialization().defaultembed
+    if whitelisted:
+        last_message = [message async for message in interaction.channel.history(limit=2)]
+        for entry in last_message:
+            images = entry.attachments
+            if images[0]:
+                try:
+                    await images[0].save("/temp/faceanalysis.jpeg")
+                except Exception as err:
+                    logging.error(f"Could not download image. {err}")
+                await interaction.response.send_message("Estarei analisando a imagem. Isto pode demorar alguns minutos.")
+                face_analysis = DeepFace.analyze(img_path='/temp/faceanalysis.jpeg')
+                gender = face_analysis[0]['dominant_gender']
+                if gender == 'Man':
+                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} man. He must be around the age of {face_analysis[0]['age']}. He seems to be {face_analysis[0]['dominant_emotion']}."
+                else:
+                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} woman. She must be around the age of {face_analysis[0]['age']}. She seems to be {face_analysis[0]['dominant_emotion']}."
+                translator = Translator(to_lang="pt-br")
+                response = translator.translate(response)
+                await interaction.edit_original_response(response)
+            else:
+                await interaction.response.send_message("De quem você está falando?")
 
-
-
+    else:
+        await lackPermissions(interaction)
 @tree.command(name="arithmetic",
               description="Resolução de problemas simples de matemática básica.",
               )
