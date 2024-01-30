@@ -140,6 +140,21 @@ class aclient(discord.Client):
                                 await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
                             elif isinstance(e, commands.MissingRequiredArgument):
                                 await message.channel.send(f"Especifique o alvo, senhor.")
+
+                elif str.lower(message.content).__contains__("delet") or str.lower(message.content).__contains__("apag"):
+                    order = str.lower(message.content).split(" ")
+                    quantias = []
+                    for word in order:
+                        try:
+                            quantia = int(word)
+                            quantias.append(quantia)
+
+                        except:
+                            pass
+                    last_messages = [message async for message in message.channel.history(limit=quantias[0])]
+                    for entry in last_messages:
+                        await entry.delete()
+
                 else:
                     url = "http://api.giphy.com/v1/gifs/search"
                     reaction = openai.chat.completions.create(
@@ -423,9 +438,11 @@ async def self(interaction: discord.Interaction, message: str, target: discord.U
             try:
                 gif_choice = random.randint(1, 10)
                 gif_url = data['data'][gif_choice]['images']['fixed_height']['url']
+                await interaction.channel.send(f"{gif_url}")
             except IndexError:
                 gif_url = data['data'][0]['images']['fixed_height']['url']
-        await interaction.channel.send(f"{gif_url}")
+                pass
+
         wikipedia.set_lang("en")
         while True:
             try:
@@ -480,16 +497,16 @@ async def self(interaction: discord.Interaction):
                     await images[0].save("/temp/faceanalysis.jpeg")
                 except Exception as err:
                     logging.error(f"Could not download image. {err}")
-                await interaction.response.send_message("Estarei analisando a imagem. Isto pode demorar alguns minutos.")
+                await interaction.response.send_message(embed=default_embed("Análise Facial", "Estarei analisando a imagem. Isto pode demorar alguns minutos."))
                 face_analysis = DeepFace.analyze(img_path='/temp/faceanalysis.jpeg')
                 gender = face_analysis[0]['dominant_gender']
                 if gender == 'Man':
-                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} man. He must be around the age of {face_analysis[0]['age']}. He seems to be {face_analysis[0]['dominant_emotion']}."
+                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} man. He must be around the age of {face_analysis[0]['age']}. He seems to be feeling {face_analysis[0]['dominant_emotion']}."
                 else:
-                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} woman. She must be around the age of {face_analysis[0]['age']}. She seems to be {face_analysis[0]['dominant_emotion']}."
+                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} woman. She must be around the age of {face_analysis[0]['age']}. She seems to be feeling {face_analysis[0]['dominant_emotion']}."
                 translator = Translator(to_lang="pt-br")
-                response = translator.translate(response)
-                await interaction.edit_original_response(response)
+                response = default_embed("Resultado da Análise", translator.translate(response))
+                await interaction.edit_original_response(embed=response)
             else:
                 await interaction.response.send_message("De quem você está falando?")
 
