@@ -122,12 +122,16 @@ class Initialization:
                 'openaitoken': openai.api_key,
                 "elevenlabsapikey": elevenlabs_token
             }
-            with open("token.json", "w") as file:
-                json.dump(data, file, indent=4)
-                token = open("token.json")
-                token = json.load(token)
-                token = token["token"]
-                return token
+            with open(TOKEN_FILE, "r") as file:
+                token_data = json.load(file)
+                if self.model == 1:
+                    self.bot_token = token_data.get("token")
+                elif self.model == 2:
+                    self.bot_token = token_data.get("backup")
+                self.ai_token = token_data.get("openaitoken")
+                openai.api_key = self.ai_token
+                self.voice_token = token_data.get("elevenlabsapikey")
+                elevenlabs.set_api_key(self.voice_token)
 
     def check_whitelist(self, userid):
         userid = str(userid)
