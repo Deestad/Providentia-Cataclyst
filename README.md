@@ -1,4 +1,4 @@
-# PROVIDENTIA: CATACLYST XL
+# PROVIDENTIA: CATACLYST X
 ## Military, Extermination, and Intelligence in Nationalized Discord Servers
 
 > *"The key words of violent economics are urbanization, industrialization, centralization, efficiency, quantity, speed."*
@@ -14,7 +14,7 @@ Providentia was a divine personification of the ability to foresee and make prov
 However, she played a significant role in Roman culture and politics. She was often depicted on coins and public buildings, symbolizing the emperor's wisdom and foresight in governing the empire. She was also invoked in prayers and rituals for prosperity and stability.
 
 
-## What does Providentia Cataclyst XL represent?
+## What does Providentia Cataclyst X represent?
 
 This remarkable bot, **Providentia - Type C**, is the brainchild of the illustrious empire of Lygon Xin, renowned as the nation of Kaisara. Originally designed from the Model of Ryujin, with the sole purpose of obliterating Jambonia, Providentia has since evolved into an essential utilitarian tool and a stalwart guardian of server security.
 
