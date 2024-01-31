@@ -1,4 +1,4 @@
-# PROVIDENTIA: CATACLYST
+# PROVIDENTIA: CATACLYST XL
 ## Military, Extermination, and Intelligence in Nationalized Discord Servers
 
 > *"The key words of violent economics are urbanization, industrialization, centralization, efficiency, quantity, speed."*
