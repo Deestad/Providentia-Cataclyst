@@ -3,7 +3,7 @@
 
 > *"The key words of violent economics are urbanization, industrialization, centralization, efficiency, quantity, speed."*
 
-![2B from Nier](https://i.pinimg.com/564x/08/ae/03/08ae035f16b6c3971f0c998022371731.jpg)
+![2B from Nier](https://i.pinimg.com/736x/3d/fe/ac/3dfeacdac766a779a9d00bdddc04b193.jpg)
 
 Discord bot built for spying and war. Made with SQL and Python using the module discord.py Uses panda and matplot for data and statistical analysis. Has commands relating to fun and memes, and also facial recognition of discord attachments. More content is planned to be invented for the bot.
 
