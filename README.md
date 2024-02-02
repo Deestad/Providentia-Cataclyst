@@ -5,6 +5,10 @@
 
 ![2B from Nier](https://i.pinimg.com/736x/3d/fe/ac/3dfeacdac766a779a9d00bdddc04b193.jpg)
 
+
+https://github.com/Deestad/Providentia-Cataclyst/assets/116316121/df7f8d10-10b1-4991-a886-d0bbea8b89ac
+
+
 ## Purpose of this automaton
 Discord bot built for spying and war. Made with SQL and Python using the module discord.py Uses panda and matplot for data and statistical analysis. Has commands relating to fun and memes, and also facial recognition of discord attachments. More content is planned to be invented for the bot.
 
