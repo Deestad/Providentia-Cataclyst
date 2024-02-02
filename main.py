@@ -15,7 +15,6 @@ import typing
 import asyncio
 import collections
 
-from wikipedia import DisambiguationError
 
 if os.name == 'nt':
     try:
@@ -24,6 +23,9 @@ if os.name == 'nt':
         print(e)
         pass
 # Third-Party Library Imports
+from bs4 import BeautifulSoup
+
+from wikipedia import DisambiguationError
 import peewee
 from peewee import Model, CharField, SqliteDatabase
 import openai
@@ -37,7 +39,7 @@ from discord.ext.commands import Bot
 from discord.ext import tasks
 import wikipedia
 import numpy as np
-from requests import get
+import requests
 from sympy import *
 import statistics
 import matplotlib.pyplot as plt
@@ -106,7 +108,7 @@ class aclient(discord.Client):
     async def on_message(self, message):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
-        spy_list = ["ações", "aleatorio", "diplomacia", "ficha"]
+        spy_list = ["ações", "aleatorio", "diplomacia"]
         userbehavior_list = ["porto", "praça-do-chodo", "geral", "parlamento"]
 
         #  WHITELIST FUNCTIONSx'
@@ -140,13 +142,34 @@ class aclient(discord.Client):
                                 await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
                             elif isinstance(e, commands.MissingRequiredArgument):
                                 await message.channel.send(f"Especifique o alvo, senhor.")
+                elif str.lower(message.content).__contains__("lembrete"):
+                    url = 'https://lystree.000webhostapp.com/inc/linkway.php'
+                    cookie = {"login_grant": "True"}
+                    page = requests.get(url, cookies=cookie)
+                    scarlett_gateway = BeautifulSoup(page.text,'html')
+                    reminder = scarlett_gateway.find('textarea').text
+                    context = openai.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        max_tokens=256,
+                        messages=[
+
+                            {"role": "system",
+                             "content": ""},
+                            {"role": "user",
+                             "content": f"{reminder} - Descreva o que eu deveria estar fazendo baseado nestas notas, "
+                                        f"que servem como lembrete.."}
+                        ]
+
+                    )
+                    await message.channel.send(context.choices[0].message.content)
+
 
                 elif str.lower(message.content).__contains__("delet") or str.lower(message.content).__contains__("apag"):
                     order = str.lower(message.content).split(" ")
                     quantias = []
                     for word in order:
                         try:
-                            quantia = int(word)
+                            quantia = int(word) + 1
                             quantias.append(quantia)
 
                         except:
@@ -223,15 +246,19 @@ class aclient(discord.Client):
                         speech = str.upper(speech)
                         await message.channel.send(speech)
                     else:
+                        last_messages = [message async for message in message.channel.history(limit=5)]
+                        context = ""
+                        for entry in last_messages:
+                            context += f"\n {entry.author} diz: {entry.content}"
                         response = openai.chat.completions.create(
                             model="gpt-3.5-turbo",
                             max_tokens=10,
                             messages=[
 
                                 {"role": "system",
-                                 "content": "Você é uma usuária do Discord."},
+                                 "content": ""},
                                 {"role": "user",
-                                 "content": f"Responda a essa mensagem como se fosse um usuário normal no chat. Seja breve e curta e não use acentos e nem pontuação. MENSAGEM: {message.content}"}
+                                 "content": f"O que acha da conversa? Dê sua opinião sendo curta e breve. Se não entender apenas fale qualquer coisa que faça sentido.  CONVERSA: {context} "}
                             ]
 
                         )
@@ -498,15 +525,20 @@ async def self(interaction: discord.Interaction):
                 except Exception as err:
                     logging.error(f"Could not download image. {err}")
                 await interaction.response.send_message(embed=default_embed("Análise Facial", "Estarei analisando a imagem. Isto pode demorar alguns minutos."))
-                face_analysis = DeepFace.analyze(img_path='/temp/faceanalysis.jpeg')
-                gender = face_analysis[0]['dominant_gender']
-                if gender == 'Man':
-                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} man. He must be around the age of {face_analysis[0]['age']}. He seems to be feeling {face_analysis[0]['dominant_emotion']}."
-                else:
-                    response = f"In the image, I see a {face_analysis[0]['dominant_race']} woman. She must be around the age of {face_analysis[0]['age']}. She seems to be feeling {face_analysis[0]['dominant_emotion']}."
-                translator = Translator(to_lang="pt-br")
-                response = default_embed("Resultado da Análise", translator.translate(response))
-                await interaction.edit_original_response(embed=response)
+                try:
+                    face_analysis = DeepFace.analyze(img_path='/temp/faceanalysis.jpeg')
+                    gender = face_analysis[0]['dominant_gender']
+                    if gender == 'Man':
+                        response = f"In the image, I see a {face_analysis[0]['dominant_race']} man. He must be around the age of {face_analysis[0]['age']}. He seems to be feeling {face_analysis[0]['dominant_emotion']}."
+                    else:
+                        response = f"In the image, I see a {face_analysis[0]['dominant_race']} woman. She must be around the age of {face_analysis[0]['age']}. She seems to be feeling {face_analysis[0]['dominant_emotion']}."
+                    translator = Translator(to_lang="pt-br")
+                    response = default_embed("Resultado da Análise", translator.translate(response))
+                    await interaction.edit_original_response(embed=response)
+                except Exception as err:
+                    if "Face could not be detected" in err:
+                        await interaction.edit_original_response(embed=default_embed("Falha em analizar a face.","Tenha certeza de usar uma foto bem iluminada e um alvo sem óculos."))
+
             else:
                 await interaction.response.send_message("De quem você está falando?")
 
