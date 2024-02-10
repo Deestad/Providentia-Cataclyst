@@ -15,7 +15,6 @@ import typing
 import asyncio
 import collections
 
-
 if os.name == 'nt':
     try:
         import winsound
@@ -109,9 +108,8 @@ class aclient(discord.Client):
         whitelisted = Initialization().check_whitelist(message.author.id)
         channel = message.channel.name
         spy_list = ["ações", "aleatorio", "diplomacia"]
-        userbehavior_list = ["porto", "praça-do-chodo", "geral", "parlamento"]
 
-        #  WHITELIST FUNCTIONSx'
+        #  WHITELIST FUNCTIONS'
         if whitelisted:
             if str.lower(message.content).startswith("providentia,"):
                 guild = client.get_guild(message.guild.id)
@@ -142,11 +140,12 @@ class aclient(discord.Client):
                                 await message.channel.send(f"Não tenho permissões para executar este comando aqui.")
                             elif isinstance(e, commands.MissingRequiredArgument):
                                 await message.channel.send(f"Especifique o alvo, senhor.")
-                elif str.lower(message.content).__contains__("lembrete"):
+                elif str.lower(message.content).__contains__("lembrete") or str.lower(message.content).__contains__(
+                        "afazeres"):
                     url = 'https://lystree.000webhostapp.com/inc/linkway.php'
                     cookie = {"login_grant": "True"}
                     page = requests.get(url, cookies=cookie)
-                    scarlett_gateway = BeautifulSoup(page.text,'html')
+                    scarlett_gateway = BeautifulSoup(page.text, 'html')
                     reminder = scarlett_gateway.find('textarea').text
                     context = openai.chat.completions.create(
                         model="gpt-3.5-turbo",
@@ -164,7 +163,8 @@ class aclient(discord.Client):
                     await message.channel.send(context.choices[0].message.content)
 
 
-                elif str.lower(message.content).__contains__("delet") or str.lower(message.content).__contains__("apag"):
+                elif str.lower(message.content).__contains__("delet") or str.lower(message.content).__contains__(
+                        "apag"):
                     order = str.lower(message.content).split(" ")
                     quantias = []
                     for word in order:
@@ -224,8 +224,8 @@ class aclient(discord.Client):
             message.guild.id) and whitelisted or client.user.mentioned_in(
             message):
             if message.author.id != client.user.id:
-                roll = random.randint(1, 10)
-                if roll == 5 or client.user.mentioned_in(message):
+                roll = random.randint(1, 4)
+                if roll == 4 or client.user.mentioned_in(message):
                     roll_type = random.randint(1, 2)
                     if roll_type == 1:
                         last_messages = [message async for message in message.channel.history(limit=100)]
@@ -524,7 +524,8 @@ async def self(interaction: discord.Interaction):
                     await images[0].save("/temp/faceanalysis.jpeg")
                 except Exception as err:
                     logging.error(f"Could not download image. {err}")
-                await interaction.response.send_message(embed=default_embed("Análise Facial", "Estarei analisando a imagem. Isto pode demorar alguns minutos."))
+                await interaction.response.send_message(embed=default_embed("Análise Facial",
+                                                                            "Estarei analisando a imagem. Isto pode demorar alguns minutos."))
                 try:
                     face_analysis = DeepFace.analyze(img_path='/temp/faceanalysis.jpeg')
                     gender = face_analysis[0]['dominant_gender']
@@ -537,13 +538,16 @@ async def self(interaction: discord.Interaction):
                     await interaction.edit_original_response(embed=response)
                 except Exception as err:
                     if "Face could not be detected" in err:
-                        await interaction.edit_original_response(embed=default_embed("Falha em analizar a face.","Tenha certeza de usar uma foto bem iluminada e um alvo sem óculos."))
+                        await interaction.edit_original_response(embed=default_embed("Falha em analizar a face.",
+                                                                                     "Tenha certeza de usar uma foto bem iluminada e um alvo sem óculos."))
 
             else:
                 await interaction.response.send_message("De quem você está falando?")
 
     else:
         await lackPermissions(interaction)
+
+
 @tree.command(name="arithmetic",
               description="Resolução de problemas simples de matemática básica.",
               )

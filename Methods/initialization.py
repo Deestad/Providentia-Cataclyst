@@ -122,6 +122,7 @@ class Initialization:
                 'openaitoken': openai.api_key,
                 "elevenlabsapikey": elevenlabs_token
             }
+
             with open(TOKEN_FILE, "r") as file:
                 token_data = json.load(file)
                 if self.model == 1:
