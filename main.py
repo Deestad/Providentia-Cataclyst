@@ -258,7 +258,10 @@ class aclient(discord.Client):
                                 {"role": "system",
                                  "content": ""},
                                 {"role": "user",
-                                 "content": f"O que acha da conversa? Dê sua opinião sendo curta e breve. Se não entender apenas fale qualquer coisa que faça sentido.  CONVERSA: {context} "}
+                                 "content": f"Você é uma usuária de Discord, veja esta conversa e responda da melhor "
+                                            f"forma. Se não entender apenas fale qualquer coisa que faça sentido. "
+                                            f" CONVERSA: {context} "}
+
                             ]
 
                         )
