@@ -40,7 +40,7 @@ Providentia has undergone several transformations across its models, each one re
 
 
 ### Contributing
-We welcome contributions from the community to further enhance Providentia's capabilities. If you're interested in contributing, please follow our [contribution guidelines](link_to_contrib_guidelines).
+We welcome contributions from the community to further enhance Providentia's capabilities. 
 
 ![2B from Nier](readme/niergif.gif)
 
